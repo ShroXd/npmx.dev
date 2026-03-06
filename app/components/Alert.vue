@@ -1,34 +1,31 @@
 <script setup lang="ts">
 interface Props {
   variant: 'warning' | 'error'
-  icon?: string
   title?: string
 }
 
 defineProps<Props>()
 
-const variantClasses: Record<Props['variant'], string> = {
+const wrapperClasses: Record<Props['variant'], string> = {
   warning: 'border-amber-400/20 bg-amber-500/8',
   error: 'border-red-400/20 bg-red-500/8',
 }
 
-const iconClasses: Record<Props['variant'], string> = {
-  warning: 'text-amber-400/80',
-  error: 'text-red-400/80',
+const titleClasses: Record<Props['variant'], string> = {
+  warning: 'text-amber-800 dark:text-amber-300',
+  error: 'text-red-800 dark:text-red-300',
+}
+
+const bodyClasses: Record<Props['variant'], string> = {
+  warning: 'text-amber-700 dark:text-amber-400',
+  error: 'text-red-700 dark:text-red-400',
 }
 </script>
 
 <template>
-  <div role="alert" class="border rounded-md px-3 py-2.5" :class="variantClasses[variant]">
-    <p v-if="icon || title" class="flex items-center gap-1.5 text-sm font-medium text-fg mb-1">
-      <span
-        v-if="icon"
-        :class="[`i-lucide:${icon}`, 'w-3.5 h-3.5 shrink-0', iconClasses[variant]]"
-        aria-hidden="true"
-      />
-      {{ title }}
-    </p>
-    <div class="text-sm text-fg-muted">
+  <div role="alert" class="border rounded-md px-3 py-2.5" :class="wrapperClasses[variant]">
+    <p v-if="title" class="font-semibold mb-1" :class="titleClasses[variant]">{{ title }}</p>
+    <div class="text-xs" :class="bodyClasses[variant]">
       <slot />
     </div>
   </div>
