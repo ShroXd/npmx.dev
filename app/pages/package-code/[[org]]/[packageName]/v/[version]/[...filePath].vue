@@ -108,11 +108,6 @@ const isViewingFile = computed(() => currentNode.value?.type === 'file')
 const MAX_FILE_SIZE = 500 * 1024
 
 const isBinaryFile = computed(() => !!filePath.value && isBinaryFilePath(filePath.value))
-const showBinaryContent = shallowRef(false)
-
-watch(filePath, () => {
-  showBinaryContent.value = false
-})
 
 const isFileTooLarge = computed(() => {
   const size = currentNode.value?.size
@@ -122,11 +117,13 @@ const isFileTooLarge = computed(() => {
 // Fetch file content when a file is selected (and not too large)
 const fileContentUrl = computed(() => {
   // Don't fetch if no file path, file tree not loaded, file is too large, or it's a directory
-  if (!filePath.value || !fileTree.value || isFileTooLarge.value || !isViewingFile.value) {
-    return null
-  }
-  // Don't fetch binary files until user explicitly requests rendering
-  if (isBinaryFile.value && !showBinaryContent.value) {
+  if (
+    !filePath.value ||
+    !fileTree.value ||
+    isFileTooLarge.value ||
+    !isViewingFile.value ||
+    isBinaryFile.value
+  ) {
     return null
   }
   return `/api/registry/file/${packageName.value}/v/${version.value}/${filePath.value}`
@@ -533,24 +530,16 @@ defineOgImageComponent('Default', {
         </template>
 
         <!-- Binary file warning -->
-        <div
-          v-else-if="isViewingFile && isBinaryFile && !showBinaryContent"
-          class="py-20 text-center"
-        >
+        <div v-else-if="isViewingFile && isBinaryFile" class="py-20 text-center">
           <div class="i-lucide:binary w-12 h-12 mx-auto text-fg-subtle mb-4" />
           <p class="text-fg-muted mb-2">{{ $t('code.binary_file') }}</p>
           <p class="text-fg-subtle text-sm mb-4">{{ $t('code.binary_rendering_warning') }}</p>
-          <div class="flex items-center justify-center gap-3">
-            <ButtonBase @click="showBinaryContent = true">{{
-              $t('code.render_anyway')
-            }}</ButtonBase>
-            <LinkBase
-              variant="button-secondary"
-              :to="`https://cdn.jsdelivr.net/npm/${packageName}@${version}/${filePath}`"
-            >
-              {{ $t('code.view_raw') }}
-            </LinkBase>
-          </div>
+          <LinkBase
+            variant="button-secondary"
+            :to="`https://cdn.jsdelivr.net/npm/${packageName}@${version}/${filePath}`"
+          >
+            {{ $t('code.view_raw') }}
+          </LinkBase>
         </div>
 
         <!-- File too large warning -->
