@@ -164,18 +164,18 @@ export const BACKGROUND_THEME_TOKENS = {
  */
 export const SHARE_CARD_THEMES = {
   dark: {
-    bg: '#101010',        // --bg:          oklch(0.171 0 0)
-    border: '#262626',    // --border:      oklch(0.269 0 0)
-    divider: '#1f1f1f',   // --border-subtle: oklch(0.239 0 0)
-    text: '#f9f9f9',      // --fg:          oklch(0.982 0 0)
+    bg: '#101010', // --bg:          oklch(0.171 0 0)
+    border: '#262626', // --border:      oklch(0.269 0 0)
+    divider: '#1f1f1f', // --border-subtle: oklch(0.239 0 0)
+    text: '#f9f9f9', // --fg:          oklch(0.982 0 0)
     textMuted: '#adadad', // --fg-muted:    oklch(0.749 0 0)
     textSubtle: '#969696', // --fg-subtle:  oklch(0.673 0 0)
   },
   light: {
-    bg: '#ffffff',        // --bg:          oklch(1 0 0)
-    border: '#cecece',    // --border:      oklch(0.8514 0 0)
-    divider: '#e5e5e5',   // --border-subtle: oklch(0.922 0 0)
-    text: '#0a0a0a',      // --fg:          oklch(0.146 0 0)
+    bg: '#ffffff', // --bg:          oklch(1 0 0)
+    border: '#cecece', // --border:      oklch(0.8514 0 0)
+    divider: '#e5e5e5', // --border-subtle: oklch(0.922 0 0)
+    text: '#0a0a0a', // --fg:          oklch(0.146 0 0)
     textMuted: '#474747', // --fg-muted:    oklch(0.398 0 0)
     textSubtle: '#5d5d5d', // --fg-subtle:  oklch(0.48 0 0)
   },

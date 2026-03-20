@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 const props = defineProps<{
   packageName: string
   resolvedVersion: string
@@ -164,7 +163,12 @@ function handleCopyLink() {
         </Transition>
       </div>
 
-      <ButtonBase variant="primary" classicon="i-lucide:download" :disabled="!imgLoaded" @click="downloadCard">
+      <ButtonBase
+        variant="primary"
+        classicon="i-lucide:download"
+        :disabled="!imgLoaded"
+        @click="downloadCard"
+      >
         Download PNG
       </ButtonBase>
     </div>
