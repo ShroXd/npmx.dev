@@ -305,7 +305,6 @@ const sparklineAreaPoints = computed(() => {
           class="flex flex-col justify-center flex-shrink-0"
           :style="{
             height: `${BOTTOM_ROW_H}px`,
-            borderTop: `1px solid ${t.divider}`,
             padding: '0 40px 0 32px',
           }"
         >
@@ -380,8 +379,6 @@ const sparklineAreaPoints = computed(() => {
         </div>
       </div>
 
-      <!-- Vertical divider -->
-      <div class="flex-shrink-0" :style="{ width: '1px', backgroundColor: t.border }" />
 
       <!-- Right panel — 400px -->
       <div class="flex flex-col flex-shrink-0" style="width: 400px">
@@ -445,8 +442,6 @@ const sparklineAreaPoints = computed(() => {
           <div v-else :style="{ height: `${SPARK_H}px` }" />
         </div>
 
-        <!-- Divider -->
-        <div :style="{ height: '1px', backgroundColor: t.divider, flexShrink: 0 }" />
 
         <!-- Stars + Forks -->
         <div class="flex flex-row flex-shrink-0" :style="{ height: `${BOTTOM_ROW_H}px` }">
@@ -473,8 +468,6 @@ const sparklineAreaPoints = computed(() => {
               >{{ stars > 0 ? formatNum(stars) : '—' }}</span
             >
           </div>
-
-          <div class="flex-shrink-0" :style="{ width: '1px', backgroundColor: t.divider }" />
 
           <div class="flex flex-col justify-center" style="flex: 1; padding: 0 28px">
             <span
