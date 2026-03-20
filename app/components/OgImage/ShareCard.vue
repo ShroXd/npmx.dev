@@ -140,9 +140,7 @@ const BOTTOM_ROW_H = 132
                   letterSpacing: '-1px',
                 }"
               >
-                <span :style="{ color: primaryColor, marginRight: '-10px', marginLeft: '-10px' }"
-                  >.</span
-                >/{{ truncate(name, 24) }}
+                {{ truncate(name, 24) }}
               </span>
               <span
                 :style="{
