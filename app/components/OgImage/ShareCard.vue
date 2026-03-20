@@ -113,7 +113,6 @@ try {
   /* decorative — omit on failure */
 }
 
-
 // Derived
 const version = computed(() => resolvedVersion.value ?? pkg.value?.['dist-tags']?.latest ?? '')
 const isLatest = computed(() => pkg.value?.['dist-tags']?.latest === version.value)
@@ -144,11 +143,11 @@ const weekRange = computed(() => {
   return `${fmt(start)} – ${fmt(end)}`
 })
 
-// Sparkline — right panel is 400px, 24px padding each side → 352px content, 74px tall
+// Sparkline — right panel is 400px, 28px padding each side → 344px content, 90px tall
 const sparklinePoints = computed(() => {
   if (sparklineValues.length < 2) return ''
-  const W = 352,
-    H = 74,
+  const W = 344,
+    H = 90,
     P = 3
   const max = Math.max(...sparklineValues)
   const min = Math.min(...sparklineValues)
@@ -165,8 +164,8 @@ const sparklinePoints = computed(() => {
 // Area fill: close the polyline at the bottom corners
 const sparklineAreaPoints = computed(() => {
   if (!sparklinePoints.value) return ''
-  const W = 352,
-    H = 74,
+  const W = 344,
+    H = 90,
     P = 3
   return `${sparklinePoints.value} ${(W - P).toFixed(1)},${H} ${P},${H}`
 })
@@ -174,7 +173,7 @@ const sparklineAreaPoints = computed(() => {
 
 <template>
   <!--
-    Rendered at 1400×480 (1× display). Tailwind for layout; inline :style for
+    Rendered at 1200×630 (1× display). Tailwind for layout; inline :style for
     dynamic theme colours / pixel values only.
   -->
   <div
@@ -193,31 +192,17 @@ const sparklineAreaPoints = computed(() => {
       <!-- Left panel — justify-between pushes meta stats to bottom -->
       <div
         class="flex flex-col flex-1 justify-between relative"
-        style="padding: 22px 36px 20px 32px"
+        style="padding: 32px 40px 28px 36px"
       >
-        <!-- Glow blob (decorative, top-right of left panel) -->
-        <div
-          class="absolute"
-          :style="{
-            top: '-110px',
-            right: '-56px',
-            width: '360px',
-            height: '360px',
-            borderRadius: '50%',
-            backgroundColor: withAlpha(primaryColor, 0.1),
-            filter: 'blur(56px)',
-          }"
-        />
-
         <!-- TOP GROUP: name + description + chips -->
         <div class="flex flex-col" style="gap: 0">
           <!-- Name · version · latest badge -->
-          <div class="flex flex-row items-center flex-wrap" style="gap: 14px; margin-bottom: 16px">
-            <span :style="{ fontSize: '46px', fontWeight: 700, lineHeight: '1' }">
-              <span :style="{ color: primaryColor, opacity: 0.75 }">./</span
-              >{{ truncate(name, 32) }}
+          <div class="flex flex-row items-end flex-wrap gap-[14px]" style="margin-bottom: 20px">
+            <span :style="{ fontSize: '54px', fontWeight: 700, lineHeight: '1' }">
+              <span :style="{ color: primaryColor, opacity: 0.75, marginRight: '-12px' }">.</span
+              >/{{ truncate(name, 32) }}
             </span>
-            <span :style="{ fontSize: '22px', color: t.textMuted, lineHeight: '1' }"
+            <span :style="{ fontSize: '26px', color: t.textMuted, lineHeight: '1' }"
               >v{{ version }}</span
             >
             <span
@@ -242,14 +227,14 @@ const sparklineAreaPoints = computed(() => {
               fontSize: '18px',
               color: t.textMuted,
               lineHeight: '1.55',
-              marginBottom: '16px',
+              marginBottom: '22px',
             }"
           >
             {{ truncate(description || 'No description.', 400) }}
           </div>
 
           <!-- Tag chips -->
-          <div class="flex flex-row flex-wrap" style="gap: 7px">
+          <div class="flex flex-row flex-wrap gap-[12px]">
             <span
               v-if="hasTypes"
               class="flex items-center"
@@ -261,7 +246,7 @@ const sparklineAreaPoints = computed(() => {
                 color: t.textMuted,
                 lineHeight: '1.6',
               }"
-              >✓ TypeScript</span
+              >TypeScript</span
             >
             <span
               class="flex items-center"
@@ -308,9 +293,9 @@ const sparklineAreaPoints = computed(() => {
         <div class="flex flex-col">
           <div
             class="w-full"
-            :style="{ height: '1px', backgroundColor: t.divider, marginBottom: '14px' }"
+            :style="{ height: '1px', backgroundColor: t.divider, marginBottom: '18px' }"
           />
-          <div class="flex flex-row" style="gap: 32px">
+          <div class="flex flex-row" style="gap: 36px">
             <div class="flex flex-col" style="gap: 4px">
               <span
                 :style="{
@@ -322,7 +307,7 @@ const sparklineAreaPoints = computed(() => {
                 }"
                 >Install Size</span
               >
-              <span :style="{ fontSize: '22px', fontWeight: 600, color: t.text }">{{
+              <span :style="{ fontSize: '26px', fontWeight: 600, color: t.text }">{{
                 formatBytes(unpackedSize)
               }}</span>
             </div>
@@ -337,7 +322,7 @@ const sparklineAreaPoints = computed(() => {
                 }"
                 >Dependencies</span
               >
-              <span :style="{ fontSize: '22px', fontWeight: 600, color: t.text }">{{
+              <span :style="{ fontSize: '26px', fontWeight: 600, color: t.text }">{{
                 depsCount
               }}</span>
             </div>
@@ -352,7 +337,7 @@ const sparklineAreaPoints = computed(() => {
                 }"
                 >Published</span
               >
-              <span :style="{ fontSize: '22px', fontWeight: 600, color: t.text }">{{
+              <span :style="{ fontSize: '26px', fontWeight: 600, color: t.text }">{{
                 formatDate(publishedAt)
               }}</span>
             </div>
@@ -366,7 +351,7 @@ const sparklineAreaPoints = computed(() => {
       <!-- Right stats panel (400px) -->
       <div class="flex flex-col flex-shrink-0" style="width: 400px">
         <!-- Weekly Downloads (takes all remaining space above) -->
-        <div class="flex flex-col flex-1 justify-center" style="padding: 16px 24px 14px">
+        <div class="flex flex-col flex-1 justify-center" style="padding: 28px 28px 20px">
           <span
             :style="{
               fontSize: '11px',
@@ -374,29 +359,29 @@ const sparklineAreaPoints = computed(() => {
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               color: t.textSubtle,
-              marginBottom: '6px',
+              marginBottom: '8px',
             }"
             >Weekly DL</span
           >
           <span
             :style="{
-              fontSize: '52px',
+              fontSize: '64px',
               fontWeight: 700,
               color: t.text,
               lineHeight: '1',
-              marginBottom: '6px',
+              marginBottom: '8px',
             }"
             >{{ formatNum(weeklyDownloads) }}</span
           >
-          <span :style="{ fontSize: '13px', color: t.textSubtle, marginBottom: '12px' }">{{
+          <span :style="{ fontSize: '13px', color: t.textSubtle, marginBottom: '16px' }">{{
             weekRange
           }}</span>
           <!-- Sparkline with area fill -->
           <svg
             v-if="sparklinePoints"
-            width="352"
-            height="74"
-            viewBox="0 0 352 74"
+            width="344"
+            height="90"
+            viewBox="0 0 344 90"
             style="display: block"
           >
             <polyline
@@ -419,9 +404,9 @@ const sparklineAreaPoints = computed(() => {
         <div :style="{ height: '1px', backgroundColor: t.divider }" />
 
         <!-- GitHub Stars + Forks side by side (fixed height) -->
-        <div class="flex flex-row flex-shrink-0" style="height: 120px">
+        <div class="flex flex-row flex-shrink-0" style="height: 150px">
           <!-- Stars -->
-          <div class="flex flex-col flex-1 justify-center" style="padding: 12px 20px">
+          <div class="flex flex-col flex-1 justify-center" style="padding: 16px 24px">
             <span
               :style="{
                 fontSize: '11px',
@@ -429,11 +414,11 @@ const sparklineAreaPoints = computed(() => {
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
                 color: t.textSubtle,
-                marginBottom: '6px',
+                marginBottom: '8px',
               }"
               >Stars</span
             >
-            <span :style="{ fontSize: '36px', fontWeight: 700, color: t.text, lineHeight: '1' }">{{
+            <span :style="{ fontSize: '44px', fontWeight: 700, color: t.text, lineHeight: '1' }">{{
               stars > 0 ? formatNum(stars) : '—'
             }}</span>
           </div>
@@ -442,7 +427,7 @@ const sparklineAreaPoints = computed(() => {
           <div class="flex-shrink-0" :style="{ width: '1px', backgroundColor: t.divider }" />
 
           <!-- Forks -->
-          <div class="flex flex-col flex-1 justify-center" style="padding: 12px 20px">
+          <div class="flex flex-col flex-1 justify-center" style="padding: 16px 24px">
             <span
               :style="{
                 fontSize: '11px',
@@ -450,11 +435,11 @@ const sparklineAreaPoints = computed(() => {
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
                 color: t.textSubtle,
-                marginBottom: '6px',
+                marginBottom: '8px',
               }"
               >Forks</span
             >
-            <span :style="{ fontSize: '36px', fontWeight: 700, color: t.text, lineHeight: '1' }">{{
+            <span :style="{ fontSize: '44px', fontWeight: 700, color: t.text, lineHeight: '1' }">{{
               forks > 0 ? formatNum(forks) : '—'
             }}</span>
           </div>
@@ -466,13 +451,13 @@ const sparklineAreaPoints = computed(() => {
     <div
       class="flex flex-row items-center justify-between flex-shrink-0"
       :style="{
-        padding: '10px 36px 10px 34px',
+        padding: '14px 40px 14px 38px',
         borderTop: `1px solid ${t.border}`,
         backgroundColor: t.footerBg,
       }"
     >
       <div class="flex flex-row items-center" :style="{ fontSize: '16px' }">
-        <span :style="{ color: primaryColor, fontWeight: 700 }">./npmx</span>
+        <span :style="{ color: primaryColor, fontWeight: 700 }">.</span>/npmx
         <span :style="{ color: t.textSubtle, marginLeft: '7px' }">· npm package explorer</span>
       </div>
       <span :style="{ fontSize: '14px', color: t.textSubtle }">npmx.dev/package/{{ name }}</span>
