@@ -82,7 +82,12 @@ function handleCopyLink() {
 </script>
 
 <template>
-  <Modal :modal-title="`share ${packageName}`" id="share-modal" class="sm:max-w-3xl" @close="showAlt = false">
+  <Modal
+    :modal-title="`share ${packageName}`"
+    id="share-modal"
+    class="sm:max-w-3xl"
+    @close="showAlt = false"
+  >
     <!--
       aspect-ratio matches card output (1280×520 = 2.46:1).
       The PNG is rendered at full 1280px, displayed inside a ~700px container —
@@ -144,7 +149,7 @@ function handleCopyLink() {
             strategy="fixed"
           >
             <ButtonBase
-              :classicon="altCopied ? 'i-lucide:check text-green-500' : 'i-lucide:accessibility'"
+              :classicon="altCopied ? 'i-lucide:check text-green-500' : 'i-lucide:copy'"
               :class="altCopied ? 'text-green-500' : ''"
               @click="copyAlt(altText)"
             >

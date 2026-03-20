@@ -153,10 +153,13 @@ const sparklinePoints = computed(() => {
   const max = Math.max(...sparklineValues)
   const min = Math.min(...sparklineValues)
   const range = max - min || 1
+  // Add 25% buffer below min so the lowest point never touches the bottom
+  const floor = Math.max(0, min - range * 0.25)
+  const adjustedRange = max - floor || 1
   return sparklineValues
     .map((v, i) => {
       const x = P + (i / (sparklineValues.length - 1)) * (SPARK_W - P * 2)
-      const y = SPARK_H - P - ((v - min) / range) * (SPARK_H - P * 2)
+      const y = SPARK_H - P - ((v - floor) / adjustedRange) * (SPARK_H - P * 2)
       return `${x.toFixed(1)},${y.toFixed(1)}`
     })
     .join(' ')
