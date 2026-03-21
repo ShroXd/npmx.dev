@@ -1,31 +1,8 @@
 <script setup lang="ts">
-import { ACCENT_COLOR_IDS, type AccentColorId } from '#shared/utils/constants'
+import { ACCENT_COLOR_IDS, ACCENT_COLOR_TOKENS, type AccentColorId } from '#shared/utils/constants'
 
 // This page exists only as a rendering target for nuxt-og-image.
 // Visiting it directly redirects to the package page.
-
-// Hex equivalents of ACCENT_COLORS for satori (which doesn't support oklch).
-// These approximate the oklch values visually.
-const ACCENT_HEX: Record<'light' | 'dark', Record<AccentColorId, string>> = {
-  dark: {
-    sky: '#5bc4e0',
-    coral: '#f07858',
-    amber: '#f0c040',
-    emerald: '#40d088',
-    violet: '#9880e8',
-    magenta: '#d878c0',
-    neutral: '#ffffff',
-  },
-  light: {
-    sky: '#2870c0',
-    coral: '#c04030',
-    amber: '#b07020',
-    emerald: '#208060',
-    violet: '#7050b8',
-    magenta: '#a040a0',
-    neutral: '#1a1a1a',
-  },
-}
 
 const route = useRoute()
 const org = (route.params as any).org as string | undefined
@@ -37,7 +14,7 @@ const color: AccentColorId = ACCENT_COLOR_IDS.includes(colorParam as AccentColor
   ? (colorParam as AccentColorId)
   : 'sky'
 
-const primaryColor = ACCENT_HEX[theme][color]
+const primaryColor = ACCENT_COLOR_TOKENS[color][theme].hex
 
 defineOgImageComponent(
   'ShareCard',
