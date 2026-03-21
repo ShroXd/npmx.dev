@@ -244,6 +244,7 @@ import PackageTrendsChart from '~/components/Package/TrendsChart.vue'
 import FacetBarChart from '~/components/Compare/FacetBarChart.vue'
 import PackageLikeCard from '~/components/Package/LikeCard.vue'
 import SizeIncrease from '~/components/Package/SizeIncrease.vue'
+import Likes from '~/components/Package/Likes.vue'
 
 describe('component accessibility audits', () => {
   describe('DateTime', () => {
@@ -575,6 +576,16 @@ describe('component accessibility audits', () => {
           size: 'small',
         },
         slots: { default: 'Button link content' },
+      })
+      const results = await runAxe(component)
+      expect(results.violations).toEqual([])
+    })
+  })
+
+  describe.only('Likes', () => {
+    it('should have no accessibility violations', async () => {
+      const component = await mountSuspended(Likes, {
+        props: { packageName: 'svelte' },
       })
       const results = await runAxe(component)
       expect(results.violations).toEqual([])
