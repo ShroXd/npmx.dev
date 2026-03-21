@@ -105,10 +105,14 @@
     "theme_system": "System",
     "language": "Språk",
     "help_translate": "Hjelp med å oversette npmx",
-    "accent_colors": "Aksentfarger",
+    "accent_colors": {
+      "label": "Aksentfarger"
+    },
     "clear_accent": "Fjern aksentfarge",
     "translation_progress": "Oversettelsesfremdrift",
-    "background_themes": "Bakgrunnsnyanse"
+    "background_themes": {
+      "label": "Bakgrunnsnyanse"
+    }
   },
   "i18n": {
     "missing_keys": "{count} manglende oversettelse | {count} manglende oversettelser",
@@ -722,7 +726,7 @@
       "paginated": "Sideinndelt",
       "items_per_page": "Elementer per side",
       "per_page": "{count} / side",
-      "showing": "{start}-{end} av {total}",
+      "showing": "{range} av {total}",
       "previous": "Forrige side",
       "next": "Neste side",
       "nav_label": "Sideinndeling"

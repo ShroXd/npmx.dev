@@ -75,7 +75,9 @@
     "theme_system": "सिस्टम",
     "language": "भाषा",
     "help_translate": "npmx अनुवाद गर्न सहयोग गर्नुहोस्",
-    "accent_colors": "एक्सेन्ट रङहरू",
+    "accent_colors": {
+      "label": "एक्सेन्ट रङहरू"
+    },
     "clear_accent": "एक्सेन्ट रङ हटाउनुहोस्",
     "translation_progress": "अनुवाद प्रगति"
   },
@@ -640,7 +642,7 @@
       "paginated": "पृष्ठमा विभाजित",
       "items_per_page": "प्रति पृष्ठ वस्तुहरू",
       "per_page": "{count} / पृष्ठ",
-      "showing": "{total} मध्ये {start}-{end}",
+      "showing": "{total} मध्ये {range}",
       "previous": "अघिल्लो पृष्ठ",
       "next": "अर्को पृष्ठ",
       "nav_label": "पेजिनेशन"
