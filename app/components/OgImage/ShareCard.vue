@@ -6,19 +6,13 @@ const props = withDefaults(
   defineProps<{
     name: string
     theme?: 'light' | 'dark'
-    color?: string
+    color?: AccentColorId
   }>(),
   { theme: 'dark' },
 )
 
 const theme = computed(() => SHARE_CARD_THEMES[props.theme])
-const primaryColor = computed(() => {
-  const id = props.color as AccentColorId | undefined
-  if (id && id in ACCENT_COLOR_TOKENS) {
-    return ACCENT_COLOR_TOKENS[id][props.theme].hex
-  }
-  return ACCENT_COLOR_TOKENS.sky[props.theme].hex
-})
+const primaryColor = computed(() => ACCENT_COLOR_TOKENS[props.color ?? 'sky'][props.theme].hex)
 
 const compactFormatter = useCompactNumberFormatter()
 const bytesFormatter = useBytesFormatter()

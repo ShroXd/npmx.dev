@@ -11,11 +11,9 @@ const colorMode = useColorMode()
 const theme = computed(() => (colorMode.value === 'dark' ? 'dark' : 'light'))
 const { selectedAccentColor } = useAccentColor()
 
-const colorParam = computed(() => {
-  const id = selectedAccentColor.value as keyof typeof ACCENT_COLOR_TOKENS
-  if (!id || !(id in ACCENT_COLOR_TOKENS)) return ''
-  return `&color=${encodeURIComponent(id)}`
-})
+const colorParam = computed(() =>
+  selectedAccentColor.value ? `&color=${encodeURIComponent(selectedAccentColor.value)}` : '',
+)
 
 const cardUrl = computed(
   () => `/api/card/${props.packageName}.png?theme=${theme.value}${colorParam.value}`,

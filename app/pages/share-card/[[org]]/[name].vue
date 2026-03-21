@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { ACCENT_COLOR_IDS, ACCENT_COLOR_TOKENS, type AccentColorId } from '#shared/utils/constants'
+import { type AccentColorId, ACCENT_COLOR_TOKENS } from '#shared/utils/constants'
 
 // This page exists only as a rendering target for nuxt-og-image.
 // Visiting it directly redirects to the package page.
 
-const route = useRoute()
-const org = (route.params as any).org as string | undefined
-const name = (route.params as any).name as string
+const route = useRoute('share-card-org-name')
+const { org, name } = route.params
 const packageName = org ? `${org}/${name}` : name
 const theme = route.query.theme === 'light' ? 'light' : 'dark'
-const colorParam = route.query.color as string | undefined
-const color: AccentColorId = ACCENT_COLOR_IDS.includes(colorParam as AccentColorId)
-  ? (colorParam as AccentColorId)
-  : 'sky'
-
-const primaryColor = ACCENT_COLOR_TOKENS[color][theme].hex
+const colorParam = route.query.color
+const color: AccentColorId =
+  typeof colorParam === 'string' && colorParam in ACCENT_COLOR_TOKENS
+    ? (colorParam as AccentColorId)
+    : 'sky'
 
 defineOgImageComponent(
   'ShareCard',
-  { name: packageName, theme, primaryColor },
+  { name: packageName, theme, color },
   { width: 1280, height: 520 },
 )
 
