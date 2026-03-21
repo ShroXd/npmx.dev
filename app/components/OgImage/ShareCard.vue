@@ -8,7 +8,7 @@ const props = withDefaults(
     theme?: 'light' | 'dark'
     color?: string
   }>(),
-  { theme: 'dark' },
+  { theme: 'light' },
 )
 
 const t = computed(() => SHARE_CARD_THEMES[props.theme])
@@ -20,41 +20,8 @@ const primaryColor = computed(() => {
   return ACCENT_COLOR_TOKENS.sky[props.theme].hex
 })
 
-function withAlpha(color: string, alpha: number): string {
-  if (color.startsWith('oklch(')) return color.replace(')', ` / ${alpha})`)
-  if (color.startsWith('#'))
-    return (
-      color +
-      Math.round(alpha * 255)
-        .toString(16)
-        .padStart(2, '0')
-    )
-  return color
-}
-
-function formatNum(n: number) {
-  return Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
-}
-
-function formatBytes(bytes: number) {
-  if (!+bytes) return '—'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB'] as const
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function truncate(s: string, n: number) {
-  return s.length > n ? s.slice(0, n - 1) + '…' : s
-}
+const compactFormatter = useCompactNumberFormatter()
+const bytesFormatter = useBytesFormatter()
 
 const { data: resolvedVersion } = await useResolvedVersion(
   computed(() => props.name),
@@ -151,7 +118,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
                 class="text-[40px] font-medium leading-none tracking-[-1.5px]"
                 :style="{ color: t.text, fontFamily: fontMono }"
               >
-                {{ formatNum(weeklyDownloads) }}
+                {{ compactFormatter.format(weeklyDownloads) }}
               </span>
               <span class="text-[22px] font-light" :style="{ color: t.textMuted }">weekly</span>
             </div>
@@ -171,7 +138,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               v-if="hasTypes"
               class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
-                border: `1px solid ${withAlpha(t.border, 0.6)}`,
+                border: `1px solid ${t.borderMuted}`,
                 color: t.textSubtle,
               }"
               >Types</span
@@ -179,7 +146,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
             <span
               class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
-                border: `1px solid ${withAlpha(t.border, 0.6)}`,
+                border: `1px solid ${t.borderMuted}`,
                 color: t.textSubtle,
               }"
               >{{ moduleFormat }}</span
@@ -188,7 +155,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               v-if="license"
               class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
-                border: `1px solid ${withAlpha(t.border, 0.6)}`,
+                border: `1px solid ${t.borderMuted}`,
                 color: t.textSubtle,
               }"
               >{{ license }}</span
@@ -197,8 +164,8 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               v-if="repoSlug"
               class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
-                border: `1px solid ${withAlpha(t.border, 0.5)}`,
-                color: withAlpha(t.textSubtle, 0.8),
+                border: `1px solid ${t.borderFaint}`,
+                color: t.textFaint,
                 fontFamily: fontMono,
               }"
               >{{ repoSlug }}</span
@@ -228,7 +195,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               <span
                 class="text-[24px] font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: t.textMuted }"
-                >{{ formatNum(stars) }}</span
+                >{{ compactFormatter.format(stars) }}</span
               >
             </div>
 
@@ -252,7 +219,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               <span
                 class="text-[24px] font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: t.textMuted }"
-                >{{ formatNum(forks) }}</span
+                >{{ compactFormatter.format(forks) }}</span
               >
             </div>
 
@@ -276,7 +243,7 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               <span
                 class="text-[24px] font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: t.textMuted }"
-                >{{ formatBytes(unpackedSize) }}</span
+                >{{ bytesFormatter.format(unpackedSize) }}</span
               >
             </div>
 
