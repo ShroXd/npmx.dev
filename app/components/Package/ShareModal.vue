@@ -131,46 +131,46 @@ function handleCopyLink() {
     </div>
 
     <!-- Action row -->
-    <div class="flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2">
+      <Transition
+        enter-active-class="transition-all duration-150"
+        leave-active-class="transition-all duration-100"
+        enter-from-class="opacity-0 translate-y-1"
+        leave-to-class="opacity-0 translate-y-1"
+      >
+        <TooltipApp
+          v-if="showAlt"
+          :text="altCopied ? altText : 'Copy alt text for screen readers'"
+          position="top"
+          strategy="fixed"
+        >
+          <ButtonBase
+            :classicon="altCopied ? 'i-lucide:check' : 'i-lucide:copy'"
+            @click="copyAlt(altText)"
+          >
+            {{ altCopied ? 'Copied!' : 'Copy ALT' }}
+          </ButtonBase>
+        </TooltipApp>
+      </Transition>
+
+      <div class="flex items-center gap-2 ml-auto">
         <ButtonBase
-          :classicon="linkCopied ? 'i-lucide:check text-green-500' : 'i-lucide:link'"
+          :classicon="linkCopied ? 'i-lucide:check' : 'i-lucide:link'"
           :disabled="!imgLoaded"
           @click="handleCopyLink"
         >
           {{ linkCopied ? 'Copied!' : 'Copy link' }}
         </ButtonBase>
 
-        <Transition
-          enter-active-class="transition-all duration-300 ease-out"
-          enter-from-class="opacity-0 -translate-x-2 scale-95"
-          enter-to-class="opacity-100 translate-x-0 scale-100"
+        <ButtonBase
+          variant="primary"
+          classicon="i-lucide:download"
+          :disabled="!imgLoaded"
+          @click="downloadCard"
         >
-          <TooltipApp
-            v-if="showAlt"
-            :text="altCopied ? altText : 'Copy alt text for screen readers'"
-            position="top"
-            strategy="fixed"
-          >
-            <ButtonBase
-              :classicon="altCopied ? 'i-lucide:check text-green-500' : 'i-lucide:copy'"
-              :class="altCopied ? 'text-green-500' : ''"
-              @click="copyAlt(altText)"
-            >
-              {{ altCopied ? 'Copied!' : 'Copy ALT' }}
-            </ButtonBase>
-          </TooltipApp>
-        </Transition>
+          Download PNG
+        </ButtonBase>
       </div>
-
-      <ButtonBase
-        variant="primary"
-        classicon="i-lucide:download"
-        :disabled="!imgLoaded"
-        @click="downloadCard"
-      >
-        Download PNG
-      </ButtonBase>
     </div>
   </Modal>
 </template>
