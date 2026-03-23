@@ -58,8 +58,8 @@ const repoSlug = computed(() => {
   return truncate(`${ref.owner}/${ref.repo}`, 26)
 })
 
-const fontSans = "'Geist', ui-sans-serif, sans-serif"
-const fontMono = "'Geist Mono', ui-monospace, monospace"
+const fontSans = "'Geist'"
+const fontMono = "'Geist Mono'"
 </script>
 
 <template>
@@ -97,10 +97,10 @@ const fontMono = "'Geist Mono', ui-monospace, monospace"
               </span>
               <span
                 v-if="isLatest"
-                class="flex items-center text-[20px] font-normal py-1 px-[14px] rounded-[20px] leading-[1.5] tracking-[0.04em]"
+                class="flex items-center text-[20px] font-normal py-1 px-[14px] rounded-[6px] leading-[1.5] tracking-[0.04em]"
                 :style="{
-                  border: `1px solid ${withAlpha(primaryColor, 0.25)}`,
-                  color: withAlpha(primaryColor, 0.9),
+                  backgroundColor: withAlpha(primaryColor, 0.1),
+                  color: primaryColor,
                 }"
                 >latest</span
               >
