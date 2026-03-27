@@ -78,7 +78,10 @@ const fontMono = "'Geist Mono'"
       <!-- Content column -->
       <div class="flex flex-col flex-1 overflow-hidden justify-between">
         <!-- Top content -->
-        <div class="flex flex-col" style="padding-top: 2rem; padding-right: 2.5rem; padding-left: 2rem;">
+        <div
+          class="flex flex-col"
+          style="padding-top: 2rem; padding-right: 2.5rem; padding-left: 2rem"
+        >
           <!-- Top row: name+version+latest ← → downloads — single baseline -->
           <div class="flex flex-row items-baseline justify-between mb-4">
             <!-- Left: name · version · latest -->
@@ -114,7 +117,9 @@ const fontMono = "'Geist Mono'"
               >
                 {{ compactFormatter.format(weeklyDownloads) }}
               </span>
-              <span class="text-[1.375rem] font-light" :style="{ color: theme.textMuted }">weekly</span>
+              <span class="text-[1.375rem] font-light" :style="{ color: theme.textMuted }"
+                >weekly</span
+              >
             </div>
           </div>
 
@@ -168,7 +173,10 @@ const fontMono = "'Geist Mono'"
         </div>
 
         <!-- Bottom unified stats row -->
-        <div class="flex flex-col justify-center flex-shrink-0 h-[132px]" style="padding-right: 2.5rem; padding-left: 2rem;">
+        <div
+          class="flex flex-col justify-center flex-shrink-0 h-[132px]"
+          style="padding-right: 2.5rem; padding-left: 2rem"
+        >
           <div class="flex flex-row items-center gap-[42px]">
             <!-- Stars -->
             <div v-if="stars > 0" class="flex flex-row items-center gap-2">
@@ -306,15 +314,15 @@ const fontMono = "'Geist Mono'"
         class="flex flex-row items-center text-[1.375rem] font-light"
         :style="{ fontFamily: fontMono }"
       >
-        <span class="font-medium" :style="{ color: primaryColor, marginLeft: '-0.25rem' }">.</span>/npmx
-        <span class="font-light" :style="{ color: theme.textSubtle, fontFamily: fontSans, marginLeft: '0.75rem' }"
+        <span class="font-medium" :style="{ color: primaryColor, marginLeft: '-0.25rem' }">.</span
+        >/npmx
+        <span
+          class="font-light"
+          :style="{ color: theme.textSubtle, fontFamily: fontSans, marginLeft: '0.75rem' }"
           >· npm package explorer</span
         >
       </div>
-      <span
-        class="text-xl font-light"
-        :style="{ color: theme.textSubtle, fontFamily: fontMono }"
-      >
+      <span class="text-xl font-light" :style="{ color: theme.textSubtle, fontFamily: fontMono }">
         npmx.dev/package/{{ name }}
       </span>
     </div>
