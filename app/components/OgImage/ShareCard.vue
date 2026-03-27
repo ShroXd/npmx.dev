@@ -78,26 +78,26 @@ const fontMono = "'Geist Mono'"
       <!-- Content column -->
       <div class="flex flex-col flex-1 overflow-hidden justify-between">
         <!-- Top content -->
-        <div class="flex flex-col pt-8 pr-10 pl-8">
+        <div class="flex flex-col" style="padding-top: 2rem; padding-right: 2.5rem; padding-left: 2rem;">
           <!-- Top row: name+version+latest ← → downloads — single baseline -->
           <div class="flex flex-row items-baseline justify-between mb-4">
             <!-- Left: name · version · latest -->
             <div class="flex flex-row items-baseline flex-wrap gap-[16px]">
               <span
-                class="text-[48px] font-medium leading-none tracking-[-1px]"
+                class="text-5xl font-medium leading-none tracking-[-1px]"
                 :style="{ fontFamily: fontMono }"
               >
                 {{ truncate(name, 24) }}
               </span>
               <span
-                class="text-[26px] font-light leading-none"
+                class="text-[1.625rem] font-light leading-none"
                 :style="{ color: theme.textMuted, fontFamily: fontMono }"
               >
                 v{{ version }}
               </span>
               <span
                 v-if="isLatest"
-                class="flex items-center text-[20px] font-normal py-1 px-[14px] rounded-[6px] leading-[1.5] tracking-[0.04em]"
+                class="flex items-center text-xl font-normal py-1 px-[14px] rounded-[6px] leading-[1.5] tracking-[0.04em]"
                 :style="{
                   backgroundColor: withAlpha(primaryColor, 0.1),
                   color: primaryColor,
@@ -109,18 +109,18 @@ const fontMono = "'Geist Mono'"
             <!-- Right: weekly downloads — flat, single line -->
             <div class="flex flex-row items-baseline flex-shrink-0 gap-[10px]">
               <span
-                class="text-[40px] font-medium leading-none tracking-[-1.5px]"
+                class="text-[2.5rem] font-medium leading-none tracking-[-1.5px]"
                 :style="{ color: theme.text, fontFamily: fontMono }"
               >
                 {{ compactFormatter.format(weeklyDownloads) }}
               </span>
-              <span class="text-[22px] font-light" :style="{ color: theme.textMuted }">weekly</span>
+              <span class="text-[1.375rem] font-light" :style="{ color: theme.textMuted }">weekly</span>
             </div>
           </div>
 
           <!-- Description -->
           <div
-            class="text-[22px] font-light leading-[1.6] mb-5"
+            class="text-[1.375rem] font-light leading-[1.6] mb-5"
             :style="{ color: theme.textMuted, fontFamily: fontSans }"
           >
             {{ truncate(description || 'No description.', 440) }}
@@ -130,7 +130,7 @@ const fontMono = "'Geist Mono'"
           <div class="flex flex-row flex-wrap gap-[16px]">
             <span
               v-if="hasTypes"
-              class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
+              class="flex items-center text-xl font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
                 border: `1px solid ${theme.borderMuted}`,
                 color: theme.textSubtle,
@@ -138,7 +138,7 @@ const fontMono = "'Geist Mono'"
               >Types</span
             >
             <span
-              class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
+              class="flex items-center text-xl font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
                 border: `1px solid ${theme.borderMuted}`,
                 color: theme.textSubtle,
@@ -147,7 +147,7 @@ const fontMono = "'Geist Mono'"
             >
             <span
               v-if="license"
-              class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
+              class="flex items-center text-xl font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
                 border: `1px solid ${theme.borderMuted}`,
                 color: theme.textSubtle,
@@ -156,7 +156,7 @@ const fontMono = "'Geist Mono'"
             >
             <span
               v-if="repoSlug"
-              class="flex items-center text-[20px] font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
+              class="flex items-center text-xl font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
                 border: `1px solid ${theme.borderFaint}`,
                 color: theme.textFaint,
@@ -168,7 +168,7 @@ const fontMono = "'Geist Mono'"
         </div>
 
         <!-- Bottom unified stats row -->
-        <div class="flex flex-col justify-center flex-shrink-0 h-[132px] pr-10 pl-8">
+        <div class="flex flex-col justify-center flex-shrink-0 h-[132px]" style="padding-right: 2.5rem; padding-left: 2rem;">
           <div class="flex flex-row items-center gap-[42px]">
             <!-- Stars -->
             <div v-if="stars > 0" class="flex flex-row items-center gap-2">
@@ -187,7 +187,7 @@ const fontMono = "'Geist Mono'"
                 />
               </svg>
               <span
-                class="text-[24px] font-normal leading-none tracking-[-0.3px]"
+                class="text-2xl font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: theme.textMuted }"
                 >{{ compactFormatter.format(stars) }}</span
               >
@@ -211,7 +211,7 @@ const fontMono = "'Geist Mono'"
                 <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9m6 3v3" />
               </svg>
               <span
-                class="text-[24px] font-normal leading-none tracking-[-0.3px]"
+                class="text-2xl font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: theme.textMuted }"
                 >{{ compactFormatter.format(forks) }}</span
               >
@@ -235,7 +235,7 @@ const fontMono = "'Geist Mono'"
                 <path d="M3.29 7L12 12l8.71-5M7.5 4.27l9 5.15" />
               </svg>
               <span
-                class="text-[24px] font-normal leading-none tracking-[-0.3px]"
+                class="text-2xl font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: theme.textMuted }"
                 >{{ bytesFormatter.format(unpackedSize) }}</span
               >
@@ -257,7 +257,7 @@ const fontMono = "'Geist Mono'"
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
               <span
-                class="text-[24px] font-normal leading-none tracking-[-0.3px]"
+                class="text-2xl font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: theme.textMuted }"
                 >{{ depsCount }}</span
               >
@@ -280,7 +280,7 @@ const fontMono = "'Geist Mono'"
                 <path d="M3 10h18" />
               </svg>
               <span
-                class="text-[24px] font-normal leading-none tracking-[-0.3px]"
+                class="text-2xl font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: theme.textMuted }"
                 >{{ formatDate(publishedAt) }}</span
               >
@@ -292,23 +292,27 @@ const fontMono = "'Geist Mono'"
 
     <!-- ── Footer ────────────────────────────────────────────────────── -->
     <div
-      class="flex flex-row items-center justify-between flex-shrink-0 py-4 pr-10 pl-8"
+      class="flex flex-row items-center justify-between flex-shrink-0"
       :style="{
         borderTop: `1px solid ${theme.border}`,
         backgroundColor: theme.bg,
+        paddingTop: '1rem',
+        paddingBottom: '1rem',
+        paddingRight: '2.5rem',
+        paddingLeft: '2rem',
       }"
     >
       <div
-        class="flex flex-row items-center text-[22px] font-light"
+        class="flex flex-row items-center text-[1.375rem] font-light"
         :style="{ fontFamily: fontMono }"
       >
-        <span class="font-medium -ml-1" :style="{ color: primaryColor }">.</span>/npmx
-        <span class="ml-3 font-light" :style="{ color: theme.textSubtle, fontFamily: fontSans }"
+        <span class="font-medium" :style="{ color: primaryColor, marginLeft: '-0.25rem' }">.</span>/npmx
+        <span class="font-light" :style="{ color: theme.textSubtle, fontFamily: fontSans, marginLeft: '0.75rem' }"
           >· npm package explorer</span
         >
       </div>
       <span
-        class="text-[20px] font-light"
+        class="text-xl font-light"
         :style="{ color: theme.textSubtle, fontFamily: fontMono }"
       >
         npmx.dev/package/{{ name }}

@@ -151,7 +151,7 @@ function handleCopyLink() {
         </TooltipApp>
       </Transition>
 
-      <div class="flex items-center gap-2 ml-auto">
+      <div class="flex items-center gap-2 ms-auto">
         <ButtonBase
           :classicon="linkCopied ? 'i-lucide:check' : 'i-lucide:link'"
           :disabled="!imgLoaded"
