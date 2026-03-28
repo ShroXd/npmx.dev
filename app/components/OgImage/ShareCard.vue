@@ -8,7 +8,7 @@ const props = withDefaults(
     theme?: 'light' | 'dark'
     color?: string
   }>(),
-  { theme: 'light' },
+  { theme: 'dark' },
 )
 
 const t = computed(() => SHARE_CARD_THEMES[props.theme])
