@@ -49,7 +49,7 @@ const hasTypes = computed(() =>
 )
 const moduleFormat = computed(() => (displayVersion.value?.type === 'module' ? 'ESM' : 'CJS'))
 const depsCount = computed(() => Object.keys(displayVersion.value?.dependencies ?? {}).length)
-const unpackedSize = computed(() => displayVersion.value?.dist?.unpackedSize ?? 0)
+const unpackedSize = computed(() => displayVersion.value?.dist?.unpackedSize ?? null)
 const publishedAt = computed(() => pkg.value?.time?.[version.value] ?? '')
 const weeklyDownloads = computed(() => downloads.value?.downloads ?? 0)
 const repoSlug = computed(() => {
@@ -143,6 +143,7 @@ const fontMono = "'Geist Mono'"
               >Types</span
             >
             <span
+              v-if="displayVersion"
               class="flex items-center text-xl font-light py-1 px-[14px] rounded-[6px] leading-[1.6]"
               :style="{
                 border: `1px solid ${theme.borderMuted}`,
@@ -245,7 +246,7 @@ const fontMono = "'Geist Mono'"
               <span
                 class="text-2xl font-normal leading-none tracking-[-0.3px]"
                 :style="{ color: theme.textMuted }"
-                >{{ bytesFormatter.format(unpackedSize) }}</span
+                >{{ unpackedSize !== null ? bytesFormatter.format(unpackedSize) : '-' }}</span
               >
             </div>
 
