@@ -1,5 +1,6 @@
 import { createError, getQuery, getRouterParam, sendRedirect } from 'h3'
 import { assertValidPackageName } from '#shared/utils/npm'
+import { ACCENT_COLOR_IDS } from '#shared/utils/constants'
 
 export default defineEventHandler(async event => {
   const segments = getRouterParam(event, 'pkg')?.split('/') ?? []
@@ -20,7 +21,11 @@ export default defineEventHandler(async event => {
 
   const query = getQuery(event)
   const theme = query.theme === 'light' ? 'light' : 'dark'
-  const color = typeof query.color === 'string' ? `&color=${encodeURIComponent(query.color)}` : ''
+  const rawColor = typeof query.color === 'string' ? query.color : null
+  const color =
+    rawColor && (ACCENT_COLOR_IDS as readonly string[]).includes(rawColor)
+      ? `&color=${rawColor}`
+      : ''
 
   return sendRedirect(
     event,
