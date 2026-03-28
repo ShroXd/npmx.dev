@@ -100,6 +100,13 @@ export default defineNuxtConfig({
   routeRules: {
     // API routes
     '/api/**': { isr: 300 },
+    '/api/card/**': {
+      isr: {
+        expiration: 3600,
+        passQuery: true,
+        allowQuery: ['theme', 'color'],
+      },
+    },
     '/api/registry/badge/**': {
       isr: {
         expiration: 60 * 60 /* one hour */,
