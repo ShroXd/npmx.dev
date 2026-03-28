@@ -18,11 +18,10 @@ const colorParam = computed(() =>
 const cardUrl = computed(
   () => `/api/card/${props.packageName}.png?theme=${theme.value}${colorParam.value}`,
 )
-const absoluteCardUrl = computed(
-  () => `${origin}/api/card/${props.packageName}.png?theme=${theme.value}${colorParam.value}`,
-)
+const absoluteCardUrl = computed(() => `${origin}${cardUrl.value}`)
 
 // Downloads for alt text
+const compactFormatter = useCompactNumberFormatter()
 const { data: downloadsData } = usePackageDownloads(
   computed(() => props.packageName),
   'last-week',
@@ -33,9 +32,7 @@ const altText = computed(() => {
   const parts: string[] = [`${props.packageName} ${props.resolvedVersion} (${tag})`]
   const dl = downloadsData.value?.downloads
   if (dl && dl > 0) {
-    parts.push(
-      `${Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(dl)} weekly downloads`,
-    )
+    parts.push(`${compactFormatter.value.format(dl)} weekly downloads`)
   }
   if (props.license) parts.push(`${props.license} license`)
   parts.push('via npmx.dev')
@@ -64,6 +61,7 @@ const imgError = ref(false)
 watch(cardUrl, () => {
   imgLoaded.value = false
   imgError.value = false
+  showAlt.value = false
 })
 
 async function downloadCard() {
@@ -71,13 +69,16 @@ async function downloadCard() {
   a.href = cardUrl.value
   a.download = `${props.packageName.replace('/', '-')}-card.png`
   document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+  try {
+    a.click()
+  } finally {
+    document.body.removeChild(a)
+  }
   showAlt.value = true
 }
 
 function handleCopyLink() {
-  copyLink(absoluteCardUrl.value)
+  copyLink()
   showAlt.value = true
 }
 </script>
@@ -122,7 +123,7 @@ function handleCopyLink() {
         :alt="`${packageName} share card`"
         class="w-full h-full rounded"
         style="object-fit: contain; image-rendering: high-quality"
-        :class="imgLoaded ? '' : 'hidden'"
+        :class="{ hidden: !imgLoaded }"
         @load="imgLoaded = true"
         @error="imgError = true"
       />
@@ -144,7 +145,7 @@ function handleCopyLink() {
         >
           <ButtonBase
             :classicon="altCopied ? 'i-lucide:check' : 'i-lucide:copy'"
-            @click="copyAlt(altText)"
+            @click="copyAlt()"
           >
             {{ altCopied ? 'Copied!' : 'Copy ALT' }}
           </ButtonBase>
