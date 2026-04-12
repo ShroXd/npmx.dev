@@ -6,10 +6,8 @@ export default defineEventHandler(async event => {
   const segments = getRouterParam(event, 'pkg')?.split('/') ?? []
 
   // Strip .png extension from the final segment (e.g. /api/card/nuxt.png)
-  if (segments.length > 0) {
-    const last = segments[segments.length - 1]!
-    if (last.endsWith('.png')) segments[segments.length - 1] = last.slice(0, -4)
-  }
+  const last = segments.at(-1)
+  if (last?.endsWith('.png')) segments[segments.length - 1] = last.slice(0, -4)
 
   const packageName = segments.join('/')
 
