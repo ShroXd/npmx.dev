@@ -20,14 +20,11 @@ export default defineEventHandler(async event => {
   const query = getQuery(event)
   const theme = query.theme === 'light' ? 'light' : 'dark'
   const rawColor = typeof query.color === 'string' ? query.color : null
-  const color =
-    rawColor && (ACCENT_COLOR_IDS as readonly string[]).includes(rawColor)
-      ? `&color=${rawColor}`
-      : ''
 
-  return sendRedirect(
-    event,
-    `/__og-image__/image/share-card/${packageName}/og.png?theme=${theme}${color}`,
-    302,
-  )
+  const params = new URLSearchParams({ theme })
+  if (rawColor && (ACCENT_COLOR_IDS as readonly string[]).includes(rawColor)) {
+    params.set('color', rawColor)
+  }
+
+  return sendRedirect(event, `/__og-image__/image/share-card/${packageName}/og.png?${params}`, 302)
 })
