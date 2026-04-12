@@ -11,13 +11,11 @@ export function toIsoDateString(date: Date): string {
  */
 export function formatDate(date: string | undefined): string {
   if (!date) return ''
-  try {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return date
-  }
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return date
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
