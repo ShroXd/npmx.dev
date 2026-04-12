@@ -221,10 +221,10 @@ const shareModal = useModal('share-modal')
         <!-- Share card -->
         <ButtonBase
           classicon="i-lucide:share-2"
-          aria-label="Share package card"
+          :aria-label="$t('package.links.share_card')"
           @click="shareModal.open()"
         >
-          <span class="max-sm:sr-only">share</span>
+          <span class="max-sm:sr-only">{{ $t('package.links.share') }}</span>
         </ButtonBase>
       </div>
     </div>

@@ -1305,6 +1305,12 @@
             },
             "compare_this_package": {
               "type": "string"
+            },
+            "share": {
+              "type": "string"
+            },
+            "share_card": {
+              "type": "string"
             }
           },
           "additionalProperties": false

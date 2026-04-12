@@ -433,7 +433,9 @@
       "docs": "docs",
       "fund": "fund",
       "compare": "compare",
-      "compare_this_package": "compare this package"
+      "compare_this_package": "compare this package",
+      "share": "share",
+      "share_card": "Share package card"
     },
     "likes": {
       "like": "Like this package",
