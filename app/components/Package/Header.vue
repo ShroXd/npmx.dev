@@ -233,7 +233,7 @@ const shareModal = useModal('share-modal')
   <PackageShareModal
     v-if="pkg"
     :package-name="packageName"
-    :resolved-version="resolvedVersion ?? ''"
+    :resolved-version="resolvedVersion ?? pkg?.['dist-tags']?.latest ?? ''"
     :is-latest="resolvedVersion === pkg?.['dist-tags']?.latest"
     :license="displayVersion?.license"
   />
