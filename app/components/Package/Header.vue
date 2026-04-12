@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
+import type { CommandPaletteContextCommandInput } from '~/types/command-palette'
 import { SCROLL_TO_TOP_THRESHOLD } from '~/composables/useScrollToTop'
-import { isEditableElement } from '~/utils/input'
 
 const props = defineProps<{
   pkg?: Pick<SlimPackument, 'name' | 'versions' | 'dist-tags'> | null
@@ -61,6 +61,14 @@ const { y: scrollY } = useScroll(window)
 const showScrollToTop = computed(() => scrollY.value > SCROLL_TO_TOP_THRESHOLD)
 
 const packageName = computed(() => props.pkg?.name ?? '')
+const fundingUrl = computed(() => {
+  let funding = props.displayVersion?.funding
+  if (Array.isArray(funding)) funding = funding[0]
+
+  if (!funding) return null
+
+  return typeof funding === 'string' ? funding : funding.url
+})
 
 const { copied: copiedPkgName, copy: copyPkgName } = useClipboard({
   source: packageName,
@@ -72,7 +80,41 @@ function hasProvenance(version: PackumentVersion | null): boolean {
   return !!(version.dist as { attestations?: unknown }).attestations
 }
 
-const router = useRouter()
+const { announce } = useCommandPalette()
+
+useCommandPaletteContextCommands(
+  computed((): CommandPaletteContextCommandInput[] => {
+    if (!packageName.value) return []
+
+    const commands: CommandPaletteContextCommandInput[] = [
+      {
+        id: 'package-copy-name',
+        group: 'package',
+        label: $t('package.copy_name'),
+        keywords: [packageName.value],
+        iconClass: 'i-lucide:copy',
+        action: () => {
+          copyPkgName()
+          announce($t('command_palette.announcements.copied_to_clipboard'))
+        },
+      },
+    ]
+
+    if (fundingUrl.value) {
+      commands.push({
+        id: 'package-link-funding',
+        group: 'links',
+        label: $t('package.links.fund'),
+        keywords: [packageName.value, $t('package.links.fund')],
+        iconClass: 'i-lucide:heart',
+        href: fundingUrl.value,
+      })
+    }
+
+    return commands
+  }),
+)
+
 // Docs URL: use our generated API docs
 const docsLink = computed(() => {
   if (!props.resolvedVersion) return null
@@ -120,70 +162,15 @@ const diffLink = computed((): RouteLocationRaw | null => {
   return diffRoute(props.pkg.name, props.resolvedVersion, props.latestVersion.version)
 })
 
-const keyboardShortcuts = useKeyboardShortcuts()
-
-onKeyStroke(
-  e => keyboardShortcuts.value && isKeyWithoutModifiers(e, '.') && !isEditableElement(e.target),
-  e => {
-    if (codeLink.value === null) return
-    e.preventDefault()
-
-    navigateTo(codeLink.value)
-  },
-  { dedupe: true },
-)
-
-onKeyStroke(
-  e => keyboardShortcuts.value && isKeyWithoutModifiers(e, 'm') && !isEditableElement(e.target),
-  e => {
-    if (mainLink.value === null) return
-    e.preventDefault()
-
-    navigateTo(mainLink.value)
-  },
-  { dedupe: true },
-)
-
-onKeyStroke(
-  e => keyboardShortcuts.value && isKeyWithoutModifiers(e, 'd') && !isEditableElement(e.target),
-  e => {
-    if (!docsLink.value) return
-    e.preventDefault()
-    navigateTo(docsLink.value)
-  },
-  { dedupe: true },
-)
-
-onKeyStroke(
-  e => keyboardShortcuts.value && isKeyWithoutModifiers(e, 'c') && !isEditableElement(e.target),
-  e => {
-    if (!props.pkg) return
-    e.preventDefault()
-    router.push({ name: 'compare', query: { packages: props.pkg.name } })
-  },
-  { dedupe: true },
-)
-
-onKeyStroke(
-  e => keyboardShortcuts.value && isKeyWithoutModifiers(e, 'f') && !isEditableElement(e.target),
-  e => {
-    if (diffLink.value === null) return
-    e.preventDefault()
-    navigateTo(diffLink.value)
-  },
-  { dedupe: true },
-)
+useShortcuts({
+  '.': () => codeLink.value,
+  'm': () => mainLink.value,
+  'd': () => docsLink.value,
+  'c': () => props.pkg && { name: 'compare' as const, query: { packages: props.pkg.name } },
+  'f': () => diffLink.value,
+})
 
 const shareModal = useModal('share-modal')
-
-const fundingUrl = computed(() => {
-  let funding = props.displayVersion?.funding
-  if (Array.isArray(funding)) funding = funding[0]
-
-  if (!funding) return null
-
-  return typeof funding === 'string' ? funding : funding.url
-})
 </script>
 
 <template>

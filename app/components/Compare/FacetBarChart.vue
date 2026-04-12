@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { VueUiHorizontalBar } from 'vue-data-ui/vue-ui-horizontal-bar'
+import { VueUiPatternSeed } from 'vue-data-ui/vue-ui-pattern-seed'
 import type { VueUiHorizontalBarConfig, VueUiHorizontalBarDatasetItem } from 'vue-data-ui'
 import { getFrameworkColor, isListedFramework } from '~/utils/frameworks'
-import { createChartPatternSlotMarkup } from '~/utils/charts'
+import { createPatternDef } from 'vue-data-ui/utils'
 import { drawSmallNpmxLogoAndTaglineWatermark } from '~/composables/useChartWatermark'
 
 import {
@@ -12,6 +13,7 @@ import {
   sanitise,
   applyEllipsis,
   copyAltTextForCompareFacetBarChart,
+  CHART_PATTERN_CONFIG,
 } from '~/utils/charts'
 
 import('vue-data-ui/style.css')
@@ -131,7 +133,7 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
         csv: false,
         altCopy: true,
       },
-      buttonTitle: {
+      buttonTitles: {
         img: $t('package.trends.download_file', { fileType: 'PNG' }),
         svg: $t('package.trends.download_file', { fileType: 'SVG' }),
         altCopy: $t('package.trends.copy_alt.button_label'),
@@ -168,6 +170,9 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
       style: {
         chart: {
           backgroundColor: colors.value.bg,
+          legend: {
+            show: false,
+          },
         },
       },
     },
@@ -194,7 +199,7 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
             },
             nameLabels: {
               fontSize: isMobile.value ? 12 : 18,
-              color: colors.value.fgSubtle,
+              color: colors.value.fg,
             },
             underlayerColor: colors.value.bg,
           },
@@ -227,14 +232,15 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
             const patternId = `tooltip-pattern-${safeSeriesIndex}`
             const usePattern = safeSeriesIndex !== 0
 
-            const patternMarkup = usePattern
-              ? createChartPatternSlotMarkup({
+            const patternDef = usePattern
+              ? createPatternDef({
                   id: patternId,
                   seed: safeSeriesIndex,
                   foregroundColor: colors.value.bg!,
-                  fallbackColor: 'transparent',
-                  maxSize: 24,
-                  minSize: 16,
+                  backgroundColor: 'transparent',
+                  maxSize: CHART_PATTERN_CONFIG.maxSize,
+                  minSize: CHART_PATTERN_CONFIG.minSize,
+                  disambiguator: CHART_PATTERN_CONFIG.disambiguator,
                 })
               : ''
 
@@ -252,9 +258,7 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
               <div class="grid grid-cols-[12px_minmax(0,1fr)_max-content] items-center gap-x-3">
                 <div class="w-3 h-3">
                   <svg viewBox="0 0 20 20" class="w-full h-full" aria-hidden="true">
-                    <defs>
-                      ${patternMarkup}
-                    </defs>
+                    ${patternDef}
                     ${markerMarkup}
                   </svg>
                 </div>
@@ -277,7 +281,7 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
 
 <template>
   <div class="font-mono facet-bar">
-    <ClientOnly v-if="dataset.length">
+    <ClientOnly v-if="packages.length">
       <VueUiHorizontalBar :key="chartKey" :dataset :config class="[direction:ltr]">
         <template #hint="{ isVisible }">
           <p v-if="isVisible" class="text-accent text-xs pt-2" aria-hidden="true">
@@ -286,14 +290,15 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
         </template>
 
         <template #pattern="{ patternId, seriesIndex }">
-          <ChartPatternSlot
+          <VueUiPatternSeed
             v-if="seriesIndex != 0"
             :id="patternId"
             :seed="seriesIndex"
             :foreground-color="colors.bg!"
-            fallback-color="transparent"
-            :max-size="24"
-            :min-size="16"
+            background-color="transparent"
+            :max-size="CHART_PATTERN_CONFIG.maxSize"
+            :min-size="CHART_PATTERN_CONFIG.minSize"
+            :disambiguator="CHART_PATTERN_CONFIG.disambiguator"
           />
         </template>
 
@@ -337,40 +342,25 @@ const config = computed<VueUiHorizontalBarConfig>(() => {
             aria-hidden="true"
           />
         </template>
+
+        <template #skeleton>
+          <!-- This empty div overrides the default built-in scanning animation on load -->
+          <div></div>
+        </template>
       </VueUiHorizontalBar>
-
-      <template #fallback>
-        <div class="flex flex-col gap-2 justify-center items-center mb-2">
-          <SkeletonInline class="h-4 w-16" />
-          <SkeletonInline class="h-4 w-28" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <SkeletonInline class="h-7 w-full" v-for="pkg in packages" :key="pkg" />
-        </div>
-      </template>
     </ClientOnly>
-
-    <template v-else>
-      <div class="flex flex-col gap-2 justify-center items-center mb-2">
-        <SkeletonInline class="h-4 w-16" />
-        <SkeletonInline class="h-4 w-28" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <SkeletonInline class="h-7 w-full" v-for="pkg in packages" :key="pkg" />
-      </div>
-    </template>
   </div>
 </template>
 
 <style scoped>
 :deep(.vue-data-ui-component svg:focus-visible) {
-  outline: 1px solid var(--accent-color) !important;
+  outline: 1px solid var(--accent) !important;
   border-radius: 0.1rem;
   outline-offset: 3px !important;
 }
 :deep(.vue-ui-user-options-button:focus-visible),
 :deep(.vue-ui-user-options :first-child:focus-visible) {
-  outline: 0.1rem solid var(--accent-color) !important;
+  outline: 0.1rem solid var(--accent) !important;
   border-radius: 0.25rem;
 }
 </style>

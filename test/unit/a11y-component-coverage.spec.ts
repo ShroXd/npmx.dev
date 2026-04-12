@@ -11,7 +11,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { assert, describe, it } from 'vitest'
-import { fileURLToPath } from 'node:url'
 
 /**
  * Components explicitly skipped from a11y testing with reasons.
@@ -27,6 +26,7 @@ const SKIPPED_COMPONENTS: Record<string, string> = {
   'OgImage/Default.vue': 'OG Image component - server-rendered image, not interactive UI',
   'OgImage/Package.vue': 'OG Image component - server-rendered image, not interactive UI',
   'OgImage/ShareCard.vue': 'OG Image component - server-rendered image, not interactive UI',
+  'OgImage/Compare.vue': 'OG Image component - server-rendered image, not interactive UI',
 
   // Package modals with complex async dependencies
   'Package/ShareModal.vue':
@@ -57,6 +57,7 @@ const SKIPPED_COMPONENTS: Record<string, string> = {
   'SkeletonInline.vue': 'Already covered indirectly via other component tests',
   'Button/Group.vue': "Wrapper component, tests wouldn't make much sense here",
   'Translation/StatusByFile.unused.vue': 'Unused component, might be needed in the future',
+  'ColorScheme/Img.vue': 'Image component, basic ui',
 }
 
 function normalizeComponentPath(filePath: string): string {
@@ -157,9 +158,9 @@ function getTestedComponents(
 }
 
 describe('a11y component test coverage', () => {
-  const componentsDir = fileURLToPath(new URL('../../app/components', import.meta.url))
-  const componentsDtsPath = fileURLToPath(new URL('../../.nuxt/components.d.ts', import.meta.url))
-  const testFilePath = fileURLToPath(new URL('../nuxt/a11y.spec.ts', import.meta.url))
+  const componentsDir = path.join(import.meta.dirname, '../../app/components')
+  const componentsDtsPath = path.join(import.meta.dirname, '../../.nuxt/components.d.ts')
+  const testFilePath = path.join(import.meta.dirname, '../nuxt/a11y.spec.ts')
 
   it('should have accessibility tests for all components (or be explicitly skipped)', () => {
     // Get all Vue components
