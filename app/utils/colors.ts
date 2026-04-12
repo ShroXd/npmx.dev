@@ -6,14 +6,18 @@
  * opacity utilities — colors must be fully resolved values.
  */
 export function withAlpha(color: string, alpha: number): string {
-  if (color.startsWith('oklch(')) return color.replace(')', ` / ${alpha})`)
-  if (color.startsWith('#'))
-    return (
-      color +
-      Math.round(alpha * 255)
-        .toString(16)
-        .padStart(2, '0')
-    )
+  const clamped = Math.min(Math.max(alpha, 0), 1)
+  if (color.startsWith('oklch(')) {
+    const withoutAlpha = color.replace(/\s*\/[^)]*(?=\))/, '')
+    return withoutAlpha.replace(')', ` / ${clamped})`)
+  }
+  if (/^#([a-f\d]{6}|[a-f\d]{8})$/i.test(color)) {
+    const base = color.slice(0, 7)
+    const a = Math.round(clamped * 255)
+      .toString(16)
+      .padStart(2, '0')
+    return `${base}${a}`
+  }
   return color
 }
 
