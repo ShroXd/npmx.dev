@@ -65,16 +65,8 @@ watch(cardUrl, () => {
   showAlt.value = false
 })
 
-async function downloadCard() {
-  const a = document.createElement('a')
-  a.href = cardUrl.value
-  a.download = `${props.packageName.replace('/', '-')}-card.png`
-  document.body.appendChild(a)
-  try {
-    a.click()
-  } finally {
-    document.body.removeChild(a)
-  }
+function downloadCard() {
+  downloadFileLink(cardUrl.value, `${props.packageName.replace('/', '-')}-card.png`)
   showAlt.value = true
 }
 
