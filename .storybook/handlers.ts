@@ -57,3 +57,37 @@ export const contributorsHandler = http.get('/api/contributors', () => {
     },
   ])
 })
+
+export const pdsUsersHandler = http.get('/api/atproto/pds-users', () => {
+  return HttpResponse.json([
+    {
+      did: 'did:plc:mock0001',
+      handle: 'patak.dog',
+      displayName: 'Patak Dog',
+      avatar:
+        'https://cdn.bsky.app/img/avatar/plain/did:plc:zjfptjaegvgc7r2axkkyyzqn/bafkreihrcqhp575f6dph4uztbeyxfrmfnbv7x2gvovrgu4idgdsdw7wety',
+    },
+    {
+      did: 'did:plc:mock0002',
+      handle: 'patakllama.mockpmx.social',
+      displayName: 'Patak Llama',
+      avatar: 'https://api.dicebear.com/9.x/initials/svg?seed=llama',
+    },
+    {
+      did: 'did:plc:mock0003',
+      handle: 'patak.horse',
+      displayName: 'Patak Horse',
+      avatar:
+        'https://cdn.bsky.app/img/avatar/plain/did:plc:vqh7id7sddkrfkhgt7tstlpd/bafkreifodkgqszgpt2qnoyljnbafokr6eujqwztj2kxo473adv5b57hjse',
+    },
+    {
+      did: 'did:plc:mock0004',
+      handle: 'patakcatapiller.mockpmx.social',
+    },
+    {
+      did: 'did:plc:mock0005',
+      handle: 'patakgoat.mockpmx.social',
+      displayName: 'Patak Goat',
+    },
+  ])
+})
