@@ -386,7 +386,8 @@ describe('package versions page', () => {
 
       await vi.waitFor(() => {
         expect(component.text()).toContain('1.x')
-        expect(component.text()).toContain('deprecated')
+        const groupHeader = component.findAll('button').find(b => b.text().includes('1.x'))
+        expect(groupHeader?.text()).toContain('deprecated')
       })
     })
   })
