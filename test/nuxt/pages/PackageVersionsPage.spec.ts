@@ -297,13 +297,13 @@ describe('package versions page', () => {
       await toggleBtn.trigger('click')
       const checkboxes = component.find('[role="dialog"]').findAll('input[type="checkbox"]')
 
-      await checkboxes[0].setValue(true) // enable show prereleases
+      await checkboxes[0]!.setValue(true) // enable show prereleases
       await vi.waitFor(() => expect(toggleBtn.text()).toBe('1'))
 
-      await checkboxes[1].setValue(true) // enable show deprecated
+      await checkboxes[1]!.setValue(true) // enable show deprecated
       await vi.waitFor(() => expect(toggleBtn.text()).toBe('2'))
 
-      await checkboxes[0].setValue(false) // disable show prereleases
+      await checkboxes[0]!.setValue(false) // disable show prereleases
       await vi.waitFor(() => expect(toggleBtn.text()).toBe('1'))
     })
   })
@@ -327,7 +327,7 @@ describe('package versions page', () => {
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       await toggleBtn.trigger('click')
       const checkboxes = component.find('[role="dialog"]').findAll('input[type="checkbox"]')
-      await checkboxes[0].setValue(true) // showPrereleases
+      await checkboxes[0]!.setValue(true) // showPrereleases
 
       await vi.waitFor(() => {
         expect(component.text()).toContain('2.x')
@@ -363,7 +363,7 @@ describe('package versions page', () => {
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       await toggleBtn.trigger('click')
       const checkboxes = component.find('[role="dialog"]').findAll('input[type="checkbox"]')
-      await checkboxes[1].setValue(true) // showDeprecated
+      await checkboxes[1]!.setValue(true) // showDeprecated
 
       await vi.waitFor(() => expect(component.text()).toContain('1.x'))
     })
@@ -382,7 +382,7 @@ describe('package versions page', () => {
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       await toggleBtn.trigger('click')
       const checkboxes = component.find('[role="dialog"]').findAll('input[type="checkbox"]')
-      await checkboxes[1].setValue(true)
+      await checkboxes[1]!.setValue(true)
 
       await vi.waitFor(() => {
         expect(component.text()).toContain('1.x')
@@ -425,8 +425,8 @@ describe('package versions page', () => {
       await vi.waitFor(() => expect(component.text()).toContain('next'))
 
       const [sortByTagBtn, sortByDateBtn] = component.findAll('button[aria-pressed]')
-      expect(sortByTagBtn.attributes('aria-pressed')).toBe('true')
-      expect(sortByDateBtn.attributes('aria-pressed')).toBe('false')
+      expect(sortByTagBtn!.attributes('aria-pressed')).toBe('true')
+      expect(sortByDateBtn!.attributes('aria-pressed')).toBe('false')
     })
 
     it('clicking "Sort by date" activates date sort mode', async () => {
@@ -439,11 +439,11 @@ describe('package versions page', () => {
       await vi.waitFor(() => expect(component.text()).toContain('next'))
 
       const [sortByTagBtn, sortByDateBtn] = component.findAll('button[aria-pressed]')
-      await sortByDateBtn.trigger('click')
+      await sortByDateBtn!.trigger('click')
 
       await vi.waitFor(() => {
-        expect(sortByDateBtn.attributes('aria-pressed')).toBe('true')
-        expect(sortByTagBtn.attributes('aria-pressed')).toBe('false')
+        expect(sortByDateBtn!.attributes('aria-pressed')).toBe('true')
+        expect(sortByTagBtn!.attributes('aria-pressed')).toBe('false')
       })
     })
 
@@ -459,15 +459,15 @@ describe('package versions page', () => {
       const [, sortByDateBtn] = component.findAll('button[aria-pressed]')
 
       // First click: date sort, defaults to newest-first
-      await sortByDateBtn.trigger('click')
+      await sortByDateBtn!.trigger('click')
       await vi.waitFor(() =>
-        expect(sortByDateBtn.attributes('aria-label')).toContain('newest first'),
+        expect(sortByDateBtn!.attributes('aria-label')).toContain('newest first'),
       )
 
       // Second click on the same active button: flips to oldest-first
-      await sortByDateBtn.trigger('click')
+      await sortByDateBtn!.trigger('click')
       await vi.waitFor(() =>
-        expect(sortByDateBtn.attributes('aria-label')).toContain('oldest first'),
+        expect(sortByDateBtn!.attributes('aria-label')).toContain('oldest first'),
       )
     })
   })
