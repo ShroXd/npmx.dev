@@ -1726,6 +1726,9 @@
             "show_deprecated": {
               "type": "string"
             },
+            "sort_tags_label": {
+              "type": "string"
+            },
             "sort_tags_by_priority": {
               "type": "string"
             },

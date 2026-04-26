@@ -574,6 +574,7 @@
       "filter_controls": "Version filter controls",
       "show_prereleases": "Show pre-releases",
       "show_deprecated": "Show deprecated",
+      "sort_tags_label": "Sort tags",
       "sort_tags_by_priority": "Sort by tag",
       "sort_tags_by_date": "Sort by date",
       "sort_tags_by_date_asc": "Sort by date, oldest first",
