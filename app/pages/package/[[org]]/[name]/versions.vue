@@ -160,7 +160,7 @@ function sortTagRows(rows: TaggedVersionRow[]): TaggedVersionRow[] {
     return [...rows].sort((rowA, rowB) => {
       const timeA = versionTimes.value[rowA.version] ?? ''
       const timeB = versionTimes.value[rowB.version] ?? ''
-      return dir * timeB.localeCompare(timeA)
+      return dir * (timeB < timeA ? -1 : timeB > timeA ? 1 : 0)
     })
   }
   return [...rows].sort((rowA, rowB) => compareTagRows(rowA, rowB, versionTimes.value))
@@ -242,15 +242,14 @@ const showHiddenTags = ref(false)
 const visibleVersionGroups = computed(() => {
   if (showPrereleases.value && showDeprecated.value) return versionGroups.value
   return versionGroups.value
-    .map(group =>
-      Object.assign({}, group, {
-        versions: group.versions.filter(v => {
-          if (!showPrereleases.value && isPrereleaseVersion(v)) return false
-          if (!showDeprecated.value && fullVersionMap.value?.get(v)?.deprecated) return false
-          return true
-        }),
-      }),
-    )
+    .map(group => {
+      const versions = group.versions.filter(v => {
+        if (!showPrereleases.value && isPrereleaseVersion(v)) return false
+        if (!showDeprecated.value && fullVersionMap.value?.get(v)?.deprecated) return false
+        return true
+      })
+      return versions.length === group.versions.length ? group : { ...group, versions }
+    })
     .filter(group => group.versions.length > 0)
 })
 
@@ -342,7 +341,7 @@ const flatItems = computed<FlatItem[]>(() => {
           <div
             class="flex items-center gap-1"
             role="group"
-            :aria-label="$t('package.versions.page_title')"
+            :aria-label="$t('package.versions.filter_controls')"
           >
             <TooltipApp :text="$t('package.versions.show_prereleases')" position="bottom">
               <button
