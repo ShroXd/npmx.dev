@@ -1717,6 +1717,9 @@
             "no_match_filter": {
               "type": "string"
             },
+            "filter_controls": {
+              "type": "string"
+            },
             "show_prereleases": {
               "type": "string"
             },
