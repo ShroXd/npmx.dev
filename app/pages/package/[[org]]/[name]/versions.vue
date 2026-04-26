@@ -376,7 +376,7 @@ const flatItems = computed<FlatItem[]>(() => {
                 <span class="i-lucide:list-filter size-3.5" aria-hidden="true" />
                 <span
                   v-if="activeFilterOptionsCount"
-                  class="absolute -top-1 -end-1 min-w-4 h-4 px-1 rounded-full bg-accent text-bg text-[10px] leading-4 font-mono"
+                  class="absolute -top-1 -end-1 min-w-4 h-4 px-1 rounded-full bg-accent text-bg text-3xs leading-4 font-mono"
                   aria-hidden="true"
                 >
                   {{ activeFilterOptionsCount }}
