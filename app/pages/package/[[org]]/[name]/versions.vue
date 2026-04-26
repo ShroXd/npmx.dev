@@ -235,9 +235,26 @@ watch(
 
 const showPrereleases = ref(false)
 const showDeprecated = ref(false)
+const filterOptionsOpen = shallowRef(false)
+const filterOptionsRef = useTemplateRef('filterOptionsRef')
+const filterOptionsId = useId()
 const tagsSortMode = ref<'priority' | 'date'>('priority')
 const tagsSortOrder = ref<'asc' | 'desc'>('desc')
 const showHiddenTags = ref(false)
+
+const activeFilterOptionsCount = computed(
+  () => Number(showPrereleases.value) + Number(showDeprecated.value),
+)
+
+onClickOutside(filterOptionsRef, () => {
+  filterOptionsOpen.value = false
+})
+
+useEventListener('keydown', event => {
+  if (event.key === 'Escape' && filterOptionsOpen.value) {
+    filterOptionsOpen.value = false
+  }
+})
 
 const visibleVersionGroups = computed(() => {
   if (showPrereleases.value && showDeprecated.value) return versionGroups.value
@@ -248,7 +265,9 @@ const visibleVersionGroups = computed(() => {
         if (!showDeprecated.value && fullVersionMap.value?.get(v)?.deprecated) return false
         return true
       })
-      return versions.length === group.versions.length ? group : { ...group, versions }
+      return versions.length === group.versions.length
+        ? group
+        : Object.assign({}, group, { versions })
     })
     .filter(group => group.versions.length > 0)
 })
@@ -338,35 +357,74 @@ const flatItems = computed<FlatItem[]>(() => {
           <h1 class="text-sm text-fg-muted shrink-0">{{ $t('package.versions.page_title') }}</h1>
         </div>
         <div class="flex items-center gap-2">
-          <div
-            class="flex items-center gap-1"
-            role="group"
-            :aria-label="$t('package.versions.filter_controls')"
-          >
-            <TooltipApp :text="$t('package.versions.show_prereleases')" position="bottom">
+          <div ref="filterOptionsRef" class="relative">
+            <TooltipApp :text="$t('package.versions.filter_controls')" position="bottom">
               <button
                 type="button"
-                class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-md border transition-colors cursor-pointer aria-pressed:(bg-fg/10 border-fg/20 text-fg) bg-transparent border-transparent text-fg-muted hover:bg-bg-subtle hover:text-fg"
-                :aria-pressed="showPrereleases"
-                :aria-label="$t('package.versions.show_prereleases')"
-                @click="showPrereleases = !showPrereleases"
+                class="relative inline-flex items-center justify-center size-8 rounded-md border transition-colors cursor-pointer"
+                :class="
+                  activeFilterOptionsCount
+                    ? 'bg-fg/10 border-fg/20 text-fg'
+                    : 'border-border text-fg-muted hover:bg-bg-subtle hover:text-fg'
+                "
+                :aria-label="$t('package.versions.filter_controls')"
+                :aria-expanded="filterOptionsOpen"
+                :aria-controls="filterOptionsId"
+                aria-haspopup="dialog"
+                @click="filterOptionsOpen = !filterOptionsOpen"
               >
-                <span class="i-lucide:flask-conical w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                <span class="hidden sm:inline">{{ $t('package.versions.show_prereleases') }}</span>
+                <span class="i-lucide:list-filter size-3.5" aria-hidden="true" />
+                <span
+                  v-if="activeFilterOptionsCount"
+                  class="absolute -top-1 -end-1 min-w-4 h-4 px-1 rounded-full bg-accent text-bg text-[10px] leading-4 font-mono"
+                  aria-hidden="true"
+                >
+                  {{ activeFilterOptionsCount }}
+                </span>
               </button>
             </TooltipApp>
-            <TooltipApp :text="$t('package.versions.show_deprecated')" position="bottom">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-md border transition-colors cursor-pointer aria-pressed:(bg-fg/10 border-fg/20 text-fg) bg-transparent border-transparent text-fg-muted hover:bg-bg-subtle hover:text-fg"
-                :aria-pressed="showDeprecated"
-                :aria-label="$t('package.versions.show_deprecated')"
-                @click="showDeprecated = !showDeprecated"
+
+            <Transition
+              enter-active-class="transition-all duration-150"
+              leave-active-class="transition-all duration-100"
+              enter-from-class="opacity-0 translate-y-1"
+              leave-to-class="opacity-0 translate-y-1"
+            >
+              <div
+                v-if="filterOptionsOpen"
+                :id="filterOptionsId"
+                class="absolute end-0 top-full mt-2 z-30 w-52 bg-bg-subtle/80 backdrop-blur-sm border border-border-subtle rounded-lg shadow-lg shadow-bg-elevated/50 overflow-hidden px-1"
+                role="dialog"
+                :aria-label="$t('package.versions.filter_controls')"
               >
-                <span class="i-lucide:archive w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                <span class="hidden sm:inline">{{ $t('package.versions.show_deprecated') }}</span>
-              </button>
-            </TooltipApp>
+                <div class="py-1">
+                  <label
+                    class="flex gap-2 items-center px-3 py-2 rounded-md hover:bg-fg/10 transition-colors cursor-pointer"
+                  >
+                    <input
+                      v-model="showPrereleases"
+                      type="checkbox"
+                      class="w-4 h-4 accent-fg bg-bg-muted border-border rounded"
+                    />
+                    <span class="text-sm text-fg font-mono flex-1">
+                      {{ $t('package.versions.show_prereleases') }}
+                    </span>
+                  </label>
+                  <label
+                    class="flex gap-2 items-center px-3 py-2 rounded-md hover:bg-fg/10 transition-colors cursor-pointer"
+                  >
+                    <input
+                      v-model="showDeprecated"
+                      type="checkbox"
+                      class="w-4 h-4 accent-fg bg-bg-muted border-border rounded"
+                    />
+                    <span class="text-sm text-fg font-mono flex-1">
+                      {{ $t('package.versions.show_deprecated') }}
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </Transition>
           </div>
           <div class="relative">
             <InputBase
