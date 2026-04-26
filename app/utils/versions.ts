@@ -1,4 +1,4 @@
-import { compare, satisfies, validRange, valid } from 'semver'
+import { compare, prerelease, satisfies, validRange, valid } from 'semver'
 
 /**
  * Utilities for handling npm package versions and dist-tags
@@ -37,6 +37,15 @@ export function parseVersion(version: string): ParsedVersion {
     patch: Number(match[3]),
     prerelease: match[4] ?? '',
   }
+}
+
+/**
+ * Check if a version is a pre-release (has a `-` suffix per semver).
+ * @param version - The version string (e.g., "1.0.0-beta.1", "2.0.0")
+ * @returns true if the version has a prerelease component
+ */
+export function isPrereleaseVersion(version: string): boolean {
+  return prerelease(version) !== null
 }
 
 /**
