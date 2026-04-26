@@ -476,7 +476,7 @@ const flatItems = computed<FlatItem[]>(() => {
             v-if="otherTagRowsAll.length > 1"
             class="flex items-center gap-0.5"
             role="group"
-            :aria-label="$t('package.versions.sort_tags_by_priority')"
+            :aria-label="$t('package.versions.sort_tags_label')"
           >
             <button
               type="button"
