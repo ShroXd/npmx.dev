@@ -651,6 +651,7 @@ const flatItems = computed<FlatItem[]>(() => {
           v-if="hiddenPrereleaseTagCount > 0"
           type="button"
           class="text-xs text-fg-muted hover:text-fg transition-colors cursor-pointer inline-flex items-center gap-1.5 px-4 sm:px-6 ps-1"
+          :aria-expanded="showHiddenTags"
           @click="showHiddenTags = !showHiddenTags"
         >
           <span
