@@ -243,6 +243,22 @@ const expandedTags = ref<Set<string>>(new Set())
 const tagVersions = ref<Map<string, VersionDisplay[]>>(new Map())
 const loadingTags = ref<Set<string>>(new Set())
 
+const showHiddenPrereleaseTags = ref(false)
+
+const stableVisibleTagRows = computed(() =>
+  visibleTagRows.value.filter(row => !isPrereleaseVersion(row.primaryVersion.version)),
+)
+
+const hiddenPrereleaseTagRows = computed(() =>
+  visibleTagRows.value.filter(row => isPrereleaseVersion(row.primaryVersion.version)),
+)
+
+const hiddenPrereleaseTagCount = computed(() => hiddenPrereleaseTagRows.value.length)
+
+const displayedTagRows = computed(() =>
+  hiddenPrereleaseTagCount.value === 0 ? visibleTagRows.value : stableVisibleTagRows.value,
+)
+
 const otherVersionsExpanded = shallowRef(false)
 const expandedMajorGroups = ref<Set<string>>(new Set())
 const otherMajorGroups = shallowRef<
@@ -611,7 +627,7 @@ function majorGroupContainsCurrent(group: (typeof otherMajorGroups.value)[0]): b
       </div>
 
       <!-- Dist-tag rows (limited to MAX_VISIBLE_TAGS) -->
-      <div v-for="row in visibleTagRows" :key="row.id">
+      <div v-for="row in displayedTagRows" :key="row.id">
         <div
           class="flex items-center gap-2 pe-2 px-1 relative group/version-row hover:bg-bg-subtle focus-within:bg-bg-subtle transition-colors duration-200 rounded-lg"
           :class="rowContainsCurrentVersion(row) ? 'bg-bg-subtle' : ''"
@@ -767,6 +783,96 @@ function majorGroupContainsCurrent(group: (typeof otherMajorGroups.value)[0]): b
             >
               <span
                 v-for="tag in filterExcludedTags(v.tags, row.tags)"
+                :key="tag"
+                class="text-5xs font-semibold uppercase tracking-wide truncate max-w-[120px]"
+                :class="tag === 'latest' ? 'text-accent' : 'text-fg-subtle'"
+                :title="tag"
+              >
+                {{ tag }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden pre-release tags expand -->
+      <div v-if="hiddenPrereleaseTagCount > 0" class="p-1">
+        <button
+          type="button"
+          class="group/version-row flex items-center gap-2 text-start rounded-sm w-full"
+          :aria-expanded="showHiddenPrereleaseTags"
+          @click="showHiddenPrereleaseTags = !showHiddenPrereleaseTags"
+        >
+          <span
+            class="size-5 -me-1 flex items-center justify-center text-fg-subtle hover:text-fg transition-colors"
+          >
+            <span
+              class="w-3 h-3 transition-transform duration-200 rtl-flip"
+              :class="showHiddenPrereleaseTags ? 'i-lucide:chevron-down' : 'i-lucide:chevron-right'"
+              aria-hidden="true"
+            />
+          </span>
+          <span
+            class="text-xs text-fg-muted py-1.5 group-hover/version-row:text-fg transition-colors"
+          >
+            {{ $t('package.versions.tags_hidden', hiddenPrereleaseTagCount) }}
+          </span>
+        </button>
+
+        <div v-if="showHiddenPrereleaseTags" class="ms-4 ps-2 border-is border-border space-y-0.5">
+          <div
+            v-for="row in hiddenPrereleaseTagRows"
+            :key="row.id"
+            class="py-1 relative group/version-row hover:bg-bg-subtle focus-within:bg-bg-subtle transition-colors duration-200 rounded-lg"
+            :class="rowContainsCurrentVersion(row) ? 'bg-bg-subtle' : ''"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <LinkBase
+                :to="versionRoute(row.primaryVersion.version)"
+                block
+                class="text-xs after:absolute after:inset-0 after:content-['']"
+                :class="
+                  row.primaryVersion.deprecated
+                    ? 'text-red-800 group-hover/version-row:text-red-700 dark:text-red-400 dark:group-hover/version-row:text-red-300'
+                    : undefined
+                "
+                :title="
+                  row.primaryVersion.deprecated
+                    ? $t('package.versions.deprecated_title', {
+                        version: row.primaryVersion.version,
+                      })
+                    : row.primaryVersion.version
+                "
+                :classicon="row.primaryVersion.deprecated ? 'i-lucide:octagon-alert' : undefined"
+              >
+                <span dir="ltr" class="block truncate">
+                  {{ row.primaryVersion.version }}
+                </span>
+              </LinkBase>
+              <div class="flex items-center gap-2 shrink-0 pe-2 relative z-10">
+                <DateTime
+                  v-if="row.primaryVersion.time"
+                  :datetime="row.primaryVersion.time"
+                  class="text-3xs text-fg-subtle"
+                  year="numeric"
+                  month="short"
+                  day="numeric"
+                />
+                <ProvenanceBadge
+                  v-if="row.primaryVersion.hasProvenance"
+                  :package-name="packageName"
+                  :version="row.primaryVersion.version"
+                  compact
+                  :linked="false"
+                />
+              </div>
+            </div>
+            <div
+              v-if="row.tags.length"
+              class="flex items-center gap-1 mt-0.5 flex-wrap relative z-10"
+            >
+              <span
+                v-for="tag in row.tags"
                 :key="tag"
                 class="text-5xs font-semibold uppercase tracking-wide truncate max-w-[120px]"
                 :class="tag === 'latest' ? 'text-accent' : 'text-fg-subtle'"
