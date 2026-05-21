@@ -249,14 +249,14 @@ const stableVisibleTagRows = computed(() =>
   visibleTagRows.value.filter(row => !isPrereleaseVersion(row.primaryVersion.version)),
 )
 
-const hiddenPrereleaseTagRows = computed(() =>
+const prereleaseTagRows = computed(() =>
   visibleTagRows.value.filter(row => isPrereleaseVersion(row.primaryVersion.version)),
 )
 
-const hiddenPrereleaseTagCount = computed(() => hiddenPrereleaseTagRows.value.length)
+const prereleaseTagCount = computed(() => prereleaseTagRows.value.length)
 
 const displayedTagRows = computed(() =>
-  hiddenPrereleaseTagCount.value === 0 ? visibleTagRows.value : stableVisibleTagRows.value,
+  prereleaseTagCount.value === 0 ? visibleTagRows.value : stableVisibleTagRows.value,
 )
 
 const otherVersionsExpanded = shallowRef(false)
@@ -796,7 +796,7 @@ function majorGroupContainsCurrent(group: (typeof otherMajorGroups.value)[0]): b
       </div>
 
       <!-- Hidden pre-release tags expand -->
-      <div v-if="hiddenPrereleaseTagCount > 0" class="p-1">
+      <div v-if="prereleaseTagCount > 0" class="p-1">
         <button
           type="button"
           class="group/version-row flex items-center gap-2 text-start rounded-sm w-full"
@@ -815,13 +815,13 @@ function majorGroupContainsCurrent(group: (typeof otherMajorGroups.value)[0]): b
           <span
             class="text-xs text-fg-muted py-1.5 group-hover/version-row:text-fg transition-colors"
           >
-            {{ $t('package.versions.tags_hidden', hiddenPrereleaseTagCount) }}
+            {{ $t('package.versions.tags_hidden', prereleaseTagCount) }}
           </span>
         </button>
 
         <div v-if="showHiddenPrereleaseTags" class="ms-4 ps-2 border-is border-border space-y-0.5">
           <div
-            v-for="row in hiddenPrereleaseTagRows"
+            v-for="row in prereleaseTagRows"
             :key="row.id"
             class="py-1 relative group/version-row hover:bg-bg-subtle focus-within:bg-bg-subtle transition-colors duration-200 rounded-lg"
             :class="rowContainsCurrentVersion(row) ? 'bg-bg-subtle' : ''"
