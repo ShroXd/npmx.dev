@@ -259,7 +259,9 @@ describe('package versions page', () => {
     it('opens and closes on toggle button click', async () => {
       nextFetchResponse = makeVersionData(['1.0.0'], { latest: '1.0.0' })
       const component = await mountPage()
-      await vi.waitFor(() => expect(component.text()).toContain('test-package'))
+      await vi.waitFor(() =>
+        expect(component.find('button[aria-haspopup="dialog"]').exists()).toBe(true),
+      )
 
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       expect(toggleBtn.attributes('aria-expanded')).toBe('false')
@@ -276,7 +278,9 @@ describe('package versions page', () => {
     it('closes when Escape is pressed', async () => {
       nextFetchResponse = makeVersionData(['1.0.0'], { latest: '1.0.0' })
       const component = await mountPage()
-      await vi.waitFor(() => expect(component.text()).toContain('test-package'))
+      await vi.waitFor(() =>
+        expect(component.find('button[aria-haspopup="dialog"]').exists()).toBe(true),
+      )
 
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       await toggleBtn.trigger('click')
@@ -289,7 +293,9 @@ describe('package versions page', () => {
     it('shows a badge counting active filters', async () => {
       nextFetchResponse = makeVersionData(['1.0.0'], { latest: '1.0.0' })
       const component = await mountPage()
-      await vi.waitFor(() => expect(component.text()).toContain('test-package'))
+      await vi.waitFor(() =>
+        expect(component.find('button[aria-haspopup="dialog"]').exists()).toBe(true),
+      )
 
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       expect(toggleBtn.text()).toBe('') // no badge when no filters active
@@ -358,7 +364,10 @@ describe('package versions page', () => {
         { version: '1.0.0', deprecated: 'Use 2.x instead', hasProvenance: false },
       ])
       const component = await mountPage()
-      await vi.waitFor(() => expect(component.text()).not.toContain('1.x'))
+      await vi.waitFor(() => {
+        expect(component.text()).toContain('2.x')
+        expect(component.text()).not.toContain('1.x')
+      })
 
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')
       await toggleBtn.trigger('click')
@@ -376,7 +385,10 @@ describe('package versions page', () => {
         { version: '1.0.0', deprecated: 'Use 2.x instead', hasProvenance: false },
       ])
       const component = await mountPage()
-      await vi.waitFor(() => expect(component.text()).not.toContain('1.x'))
+      await vi.waitFor(() => {
+        expect(component.text()).toContain('2.x')
+        expect(component.text()).not.toContain('1.x')
+      })
 
       // Enable show deprecated to reveal the all-deprecated 1.x group
       const toggleBtn = component.find('button[aria-haspopup="dialog"]')

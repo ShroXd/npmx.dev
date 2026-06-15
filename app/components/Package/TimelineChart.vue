@@ -10,7 +10,6 @@ import {
 } from 'vue-data-ui/vue-ui-xy'
 import {
   sanitise,
-  loadFile,
   applyEllipsis,
   copyAltTextForTimelineChart,
   type EnrichedTimelineSizeCacheEntry,
@@ -21,6 +20,7 @@ import { drawSmallNpmxLogoAndTaglineWatermark } from '~/composables/useChartWate
 import { useChartTooltipPosition } from '~/composables/useChartTooltipPosition'
 import { useColors } from '~/composables/useColors'
 import { parseStableVersion } from '~/utils/versions'
+import { downloadFileLink } from '~/utils/download'
 
 import('vue-data-ui/style.css')
 
@@ -277,6 +277,9 @@ const tooltipPosition = useChartTooltipPosition(chartRef)
 const config = computed<VueUiXyConfig>(() => {
   return {
     theme: isDarkMode.value ? 'dark' : '',
+    downsample: {
+      threshold: 5000,
+    },
     line: {
       useGradient: false,
       radius: 2,
@@ -372,7 +375,7 @@ const config = computed<VueUiXyConfig>(() => {
           img: args => {
             const imageUri = args?.imageUri
             if (!imageUri) return
-            loadFile(imageUri, buildExportFilename('png'))
+            downloadFileLink(imageUri, buildExportFilename('png'))
           },
           csv: csvStr => {
             if (!csvStr) return
@@ -389,14 +392,14 @@ const config = computed<VueUiXyConfig>(() => {
                 .replaceAll(`\n${multilineDateTemplate}`, ` ${multilineDateTemplate}`),
             ])
             const url = URL.createObjectURL(blob)
-            loadFile(url, buildExportFilename('csv'))
+            downloadFileLink(url, buildExportFilename('csv'))
             URL.revokeObjectURL(url)
           },
           svg: args => {
             const blob = args?.blob
             if (!blob) return
             const url = URL.createObjectURL(blob)
-            loadFile(url, buildExportFilename('svg'))
+            downloadFileLink(url, buildExportFilename('svg'))
             URL.revokeObjectURL(url)
           },
           altCopy: () =>
@@ -711,7 +714,7 @@ const indexSelection = computed(() => {
               class="pointer-events-none"
             >
               <path
-                :d="`M ${plot.x - 5} ${plot.y - 20} l 4 6 l 10 -12`"
+                :d="`M ${plot.x - 4} ${plot.y - 20} l 4 6 l 10 -12`"
                 fill="none"
                 :stroke="colors.bg"
                 stroke-width="6"
@@ -720,7 +723,7 @@ const indexSelection = computed(() => {
                 class="svg-element-transition"
               />
               <path
-                :d="`M ${plot.x - 5} ${plot.y - 20} l 4 6 l 10 -12`"
+                :d="`M ${plot.x - 4} ${plot.y - 20} l 4 6 l 10 -12`"
                 fill="none"
                 :stroke="e18eGradientColors.at(-1)"
                 stroke-width="2"
@@ -737,7 +740,7 @@ const indexSelection = computed(() => {
               class="pointer-events-none"
             >
               <path
-                :d="`M ${plot.x - 1} ${plot.y - 20 - (plot.offsetY ?? 0)} l -6 10 l 12 0 l -6 -10 m 0 5 l 0 2`"
+                :d="`M ${plot.x} ${plot.y - 20 - (plot.offsetY ?? 0)} l -6 10 l 12 0 l -6 -10 m 0 5 l 0 2`"
                 fill="none"
                 :stroke="colors.bg"
                 stroke-width="6"
@@ -746,7 +749,7 @@ const indexSelection = computed(() => {
                 class="svg-element-transition"
               />
               <path
-                :d="`M ${plot.x - 1} ${plot.y - 20 - (plot.offsetY ?? 0)} l -6 10 l 12 0 l -6 -10 m 0 5 l 0 2`"
+                :d="`M ${plot.x} ${plot.y - 20 - (plot.offsetY ?? 0)} l -6 10 l 12 0 l -6 -10 m 0 5 l 0 2`"
                 fill="none"
                 :stroke="e18eGradientColors[0]"
                 stroke-width="2"
