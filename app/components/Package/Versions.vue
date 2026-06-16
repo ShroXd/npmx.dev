@@ -804,7 +804,7 @@ function majorGroupContainsCurrent(group: (typeof otherMajorGroups.value)[0]): b
                   day="numeric"
                 />
                 <ProvenanceBadge
-                  v-if="row.primaryVersion.hasProvenance"
+                  v-if="row.primaryVersion.trustStatus?.provenance"
                   :package-name="packageName"
                   :version="row.primaryVersion.version"
                   compact
