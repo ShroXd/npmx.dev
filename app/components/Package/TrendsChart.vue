@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { VueUiXy, type VueUiXyConfig, type VueUiXySvgSlotProps } from 'vue-data-ui/vue-ui-xy'
+import { useTooltipPosition } from 'vue-data-ui/composables'
 import { useDebounceFn, useElementSize, useTimeoutFn } from '@vueuse/core'
 import { useColors } from '~/composables/useColors'
 import { OKLCH_NEUTRAL_FALLBACK, transparentizeOklch } from '~/utils/colors'
@@ -16,7 +17,6 @@ import { DATE_INPUT_MAX } from '~/utils/input'
 import { endDateOnlyToUtcMs } from '~/utils/chart-data-prediction'
 import { applyBlocklistCorrection, getAnomaliesForPackages } from '~/utils/download-anomalies'
 import { copyAltTextForTrendLineChart, sanitise, applyEllipsis } from '~/utils/charts'
-import { useChartTooltipPosition } from '~/composables/useChartTooltipPosition'
 import {
   buildNormalisedTrendsDataset,
   buildTrendsChartConfig,
@@ -25,6 +25,7 @@ import {
   getTrendsDatetimeFormatterOptions,
 } from '#shared/utils/trends-chart'
 import { downloadFileLink } from '~/utils/download'
+import { useCopyChartPng } from '~/composables/useCopyChartPng'
 import { createLastDatapointLabelsSvg } from '#shared/utils/download-chart-last-label'
 
 import('vue-data-ui/style.css')
@@ -71,6 +72,7 @@ const rootEl = shallowRef<HTMLElement | null>(null)
 const isZoomed = shallowRef(false)
 
 const chartRef = useTemplateRef('chartRef')
+const { copiedPng, isCopyingPng, copyChartPng } = useCopyChartPng(chartRef)
 
 function setIsZoom({ isZoom }: { isZoom: boolean }) {
   isZoomed.value = isZoom
@@ -1112,7 +1114,7 @@ watch(
   { immediate: true },
 )
 
-const tooltipPosition = useChartTooltipPosition(chartRef)
+const tooltipPosition = useTooltipPosition(chartRef)
 
 const keepZoomState = shallowRef(true)
 
@@ -1724,7 +1726,7 @@ const copyEmbedUrl = () => copyEmbed(embedUrl.value)
 
               <!-- Inject npmx logo & tagline during SVG and PNG print -->
               <g
-                v-if="svg.isPrintingSvg || svg.isPrintingImg"
+                v-if="svg.isPrintingSvg || svg.isPrintingImg || isCopyingPng"
                 v-html="
                   drawNpmxLogoAndTaglineWatermark({
                     svg,
@@ -1836,6 +1838,13 @@ const copyEmbedUrl = () => copyEmbed(embedUrl.value)
             </template>
             <template #optionCsv>
               <span class="text-fg-subtle font-mono pointer-events-none">CSV</span>
+            </template>
+            <template #custom-menu-before>
+              <ChartCopyPngButton
+                :copied="copiedPng"
+                :copying="isCopyingPng"
+                @click="copyChartPng"
+              />
             </template>
             <template #optionImg>
               <span class="text-fg-subtle font-mono pointer-events-none">PNG</span>
