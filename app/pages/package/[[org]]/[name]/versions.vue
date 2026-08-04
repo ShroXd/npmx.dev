@@ -235,6 +235,7 @@ const showDeprecated = ref(false)
 const filterOptionsOpen = shallowRef(false)
 const filterOptionsRef = useTemplateRef('filterOptionsRef')
 const filterOptionsId = useId()
+const hasHoverPointer = useMediaQuery('(hover: hover) and (pointer: fine)')
 const tagsSortMode = ref<'priority' | 'date'>('priority')
 const tagsSortOrder = ref<'asc' | 'desc'>('desc')
 const showHiddenTags = ref(false)
@@ -242,6 +243,7 @@ const showHiddenTags = ref(false)
 const activeFilterOptionsCount = computed(
   () => Number(showPrereleases.value) + Number(showDeprecated.value),
 )
+const showFilterOptionsTooltip = computed(() => hasHoverPointer.value && !filterOptionsOpen.value)
 
 onClickOutside(filterOptionsRef, () => {
   filterOptionsOpen.value = false
@@ -587,7 +589,12 @@ const flatItems = computed<FlatItem[]>(() => {
 
           <div class="flex items-center gap-2 max-sm:w-full">
             <div ref="filterOptionsRef" class="relative shrink-0">
-              <TooltipApp :text="$t('package.versions.filter_controls')" position="bottom">
+              <TooltipApp
+                :text="$t('package.versions.filter_controls')"
+                position="top"
+                :disabled="!showFilterOptionsTooltip"
+                :show-on-focus="false"
+              >
                 <button
                   type="button"
                   class="relative inline-flex items-center justify-center size-8 rounded-md border transition-colors cursor-pointer"
