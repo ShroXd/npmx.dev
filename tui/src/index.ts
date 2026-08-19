@@ -10,6 +10,7 @@ import {
   instantiate,
   type BoxRenderable,
   type CliRenderer,
+  type KeyEvent,
   type TabSelectOption,
   type TabSelectRenderable,
   type TextRenderable,
@@ -47,6 +48,16 @@ Run this TUI with a compatible runtime, for example:
 Current Node.js: ${process.version}`
 }
 
+function shouldQuit(key: KeyEvent): boolean {
+  return (
+    key.eventType === 'press' &&
+    key.name.toLowerCase() === 'q' &&
+    !key.ctrl &&
+    !key.meta &&
+    !key.option
+  )
+}
+
 export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   const version = options.version ?? '0.0.1'
   const themePreference = options.themePreference ?? 'system'
@@ -67,6 +78,18 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     preference: themePreference,
   })
   let theme = themeManager.theme
+
+  const quitHandler = (key: KeyEvent): void => {
+    if (!shouldQuit(key)) {
+      return
+    }
+
+    key.preventDefault()
+    key.stopPropagation()
+    renderer.destroy()
+  }
+
+  renderer.keyInput.on('keypress', quitHandler)
 
   const status = instantiate(
     renderer,
@@ -178,6 +201,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   applyTheme(theme)
   themeManager.subscribe(applyTheme)
   renderer.on(CliRenderEvents.DESTROY, () => {
+    renderer.keyInput.off('keypress', quitHandler)
     themeManager.dispose()
   })
 
