@@ -24,8 +24,13 @@
   },
   "scripts": {
     "build": "vp pack",
-    "dev": "node src/cli.ts",
+    "dev": "node src/dev.ts",
+    "dev:ffi": "node --experimental-ffi src/cli.ts",
+    "dev:once": "node src/cli.ts",
     "test:types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentui/core": "0.5.4"
   },
   "engines": {
     "node": ">=24.4.0"

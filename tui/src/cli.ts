@@ -36,6 +36,7 @@ if (values.version) {
 }
 
 runTui({ version: VERSION }).catch(error => {
-  console.error(error instanceof Error ? error.message : error)
+  const message = error instanceof Error ? error.message : String(error)
+  console.error(message)
   process.exit(1)
 })
