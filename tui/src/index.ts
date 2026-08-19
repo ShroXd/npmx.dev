@@ -1,17 +1,24 @@
 import {
   Box,
+  CliRenderEvents,
+  RGBA,
   TabSelect,
   TabSelectRenderableEvents,
   Text,
+  TextAttributes,
   createCliRenderer,
   instantiate,
+  type BoxRenderable,
+  type CliRenderer,
   type TabSelectOption,
   type TabSelectRenderable,
   type TextRenderable,
 } from '@opentui/core'
+import { createThemeManager, type Theme, type ThemePreference } from './theme/index.ts'
 
 export interface RunTuiOptions {
   version?: string
+  themePreference?: ThemePreference
 }
 
 const buttons: TabSelectOption[] = [
@@ -42,23 +49,52 @@ Current Node.js: ${process.version}`
 
 export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   const version = options.version ?? '0.0.1'
-  let renderer
+  const themePreference = options.themePreference ?? 'system'
+  let renderer: CliRenderer
 
   try {
     renderer = await createCliRenderer({
       exitOnCtrlC: true,
       clearOnShutdown: true,
       targetFps: 30,
+      backgroundColor: RGBA.defaultBackground(),
     })
   } catch (error) {
     throw new Error(getRuntimeHint(error), { cause: error })
   }
 
+  const themeManager = await createThemeManager(renderer, {
+    preference: themePreference,
+  })
+  let theme = themeManager.theme
+
   const status = instantiate(
     renderer,
     Text({
-      content: 'Selected: Button A',
-      fg: '#94A3B8',
+      content: '> Selected: Button A',
+      fg: theme.fg.muted,
+      bg: theme.bg.surface,
+      height: 1,
+    }),
+  ) as TextRenderable
+
+  const title = instantiate(
+    renderer,
+    Text({
+      content: `Ready: OpenTUI npmx-tui ${version}`,
+      fg: theme.status.success,
+      bg: theme.bg.surface,
+      attributes: TextAttributes.BOLD,
+      height: 1,
+    }),
+  ) as TextRenderable
+
+  const hint = instantiate(
+    renderer,
+    Text({
+      content: 'Use left/right arrows to switch, Enter to activate.',
+      fg: theme.fg.secondary,
+      bg: theme.bg.surface,
       height: 1,
     }),
   ) as TextRenderable
@@ -73,46 +109,82 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
       wrapSelection: true,
       showDescription: false,
       showUnderline: true,
-      textColor: '#CBD5E1',
-      selectedTextColor: '#0F172A',
-      selectedBackgroundColor: '#38BDF8',
-      focusedTextColor: '#FFFFFF',
-      focusedBackgroundColor: '#334155',
+      backgroundColor: theme.bg.surface,
+      textColor: theme.fg.secondary,
+      selectedTextColor: theme.fg.primary,
+      selectedBackgroundColor: theme.bg.selected,
+      focusedTextColor: theme.fg.primary,
+      focusedBackgroundColor: theme.bg.selected,
+      selectedDescriptionColor: theme.fg.muted,
     }),
   ) as TabSelectRenderable
 
   tabSelect.on(TabSelectRenderableEvents.SELECTION_CHANGED, (_index, selected) => {
-    status.content = `Selected: ${selected?.name ?? 'none'}`
+    status.content = `> Selected: ${selected?.name ?? 'none'}`
   })
 
   tabSelect.on(TabSelectRenderableEvents.ITEM_SELECTED, (_index, selected) => {
-    status.content = `Activated: ${selected?.name ?? 'none'}`
+    status.content = `> Activated: ${selected?.name ?? 'none'}`
   })
 
-  renderer.root.add(
+  const panel = instantiate(
+    renderer,
     Box(
       {
         borderStyle: 'rounded',
+        borderColor: theme.border.normal,
+        focusedBorderColor: theme.border.focused,
+        backgroundColor: theme.bg.surface,
+        title: 'npMx',
+        titleColor: theme.fg.secondary,
         padding: 1,
         flexDirection: 'column',
         gap: 1,
         width: 44,
         height: 10,
       },
-      Text({
-        content: `Hello, OpenTUI! npmx-tui ${version}`,
-        fg: '#22C55E',
-        height: 1,
-      }),
-      Text({
-        content: 'Use left/right arrows to switch, Enter to activate.',
-        fg: '#E2E8F0',
-        height: 1,
-      }),
+      title,
+      hint,
       tabSelect,
       status,
     ),
-  )
+  ) as BoxRenderable
+
+  function applyTheme(nextTheme: Theme): void {
+    theme = nextTheme
+    renderer.setBackgroundColor(theme.bg.base)
+
+    panel.backgroundColor = theme.bg.surface
+    panel.borderColor = theme.border.normal
+    panel.focusedBorderColor = theme.border.focused
+    panel.titleColor = theme.fg.secondary
+
+    title.fg = theme.status.success
+    title.bg = theme.bg.surface
+    hint.fg = theme.fg.secondary
+    hint.bg = theme.bg.surface
+    status.fg = theme.fg.muted
+    status.bg = theme.bg.surface
+
+    tabSelect.backgroundColor = theme.bg.surface
+    tabSelect.textColor = theme.fg.secondary
+    tabSelect.selectedTextColor = theme.fg.primary
+    tabSelect.selectedBackgroundColor = theme.bg.selected
+    tabSelect.focusedTextColor = theme.fg.primary
+    tabSelect.focusedBackgroundColor = theme.bg.selected
+    tabSelect.selectedDescriptionColor = theme.fg.muted
+  }
+
+  applyTheme(theme)
+  themeManager.subscribe(applyTheme)
+  renderer.on(CliRenderEvents.DESTROY, () => {
+    themeManager.dispose()
+  })
+
+  renderer.root.add(panel)
 
   tabSelect.focus()
 }
+
+export { createThemeManager }
+export type { Theme, ThemeManager, ThemeMode, ThemeName, ThemePreference } from './theme/index.ts'

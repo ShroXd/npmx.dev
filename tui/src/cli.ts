@@ -2,6 +2,7 @@
 import process from 'node:process'
 import { parseArgs } from 'node:util'
 import { runTui } from './index.ts'
+import { isThemePreference } from './theme/index.ts'
 
 const VERSION = '0.0.1'
 
@@ -15,6 +16,10 @@ const { values } = parseArgs({
       type: 'boolean',
       short: 'v',
     },
+    theme: {
+      type: 'string',
+      short: 't',
+    },
   },
 })
 
@@ -26,7 +31,8 @@ Usage:
 
 Options:
   -h, --help     Show help
-  -v, --version  Show version`)
+  -v, --version  Show version
+  -t, --theme    Theme preference: system, dark, light`)
   process.exit(0)
 }
 
@@ -35,7 +41,16 @@ if (values.version) {
   process.exit(0)
 }
 
-runTui({ version: VERSION }).catch(error => {
+const themePreference = values.theme ?? 'system'
+
+if (!isThemePreference(themePreference)) {
+  console.error(`Invalid theme preference: ${themePreference}
+
+Expected one of: system, dark, light`)
+  process.exit(1)
+}
+
+runTui({ version: VERSION, themePreference }).catch(error => {
   const message = error instanceof Error ? error.message : String(error)
   console.error(message)
   process.exit(1)
