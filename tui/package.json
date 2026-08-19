@@ -24,9 +24,11 @@
   },
   "scripts": {
     "build": "vp pack",
-    "dev": "node src/dev.ts",
+    "dev": "node scripts/dev-local.ts",
+    "dev:local": "node scripts/dev-local.ts",
     "dev:ffi": "node --experimental-ffi src/cli.ts",
     "dev:once": "node src/cli.ts",
+    "dev:watch": "node scripts/dev.ts",
     "test:types": "tsc --noEmit"
   },
   "dependencies": {
