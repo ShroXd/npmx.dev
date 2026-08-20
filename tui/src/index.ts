@@ -36,6 +36,7 @@ export interface RunTuiOptions {
 const SEARCH_DEBOUNCE_MS = 500
 const SEARCH_RESULT_LIMIT = 25
 const LIST_SCROLLBAR_WIDTH = 2
+const STATUS_BAR_PADDING_X = 1
 const SPLIT_LAYOUT_MIN_WIDTH = 100
 const SPINNER_FRAME_MS = 90
 const BRAILLE_SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'] as const
@@ -199,6 +200,14 @@ function createInlineMeta(items: Array<string | undefined>): string {
   return items.filter(isDefinedString).join('   ')
 }
 
+function createField(label: string, value: string | number | undefined): string | undefined {
+  if (value === undefined || value === '') {
+    return undefined
+  }
+
+  return `${label.padEnd(13, ' ')} ${value}`
+}
+
 function formatRecord(
   record: Record<string, string> | undefined,
   limit: number,
@@ -218,7 +227,7 @@ function createBracketSection(title: string, lines: string[]): InspectorLine[] {
     return []
   }
 
-  return [{ text: `[${title}]`, tone: 'section' }, ...body.map(line => ({ text: `  ${line}` }))]
+  return [{ text: title, tone: 'section' }, ...body.map(line => ({ text: `  ${line}` }))]
 }
 
 function getCollectionEmptyLines(state: AppState): Array<{ title: string; detail: string }> {
@@ -394,7 +403,6 @@ function createInstallBlock(packageName: string): InspectorLine[] {
 
 function createInspectorLines(
   pkg: PackageSearchResult | undefined,
-  state: AppState,
   detail?: PackageDetails,
   detailStatus: DetailStatus = 'idle',
   detailError?: string,
@@ -425,24 +433,9 @@ function createInspectorLines(
     linkRows.push(['bugs', data.links.bugs])
   }
 
-  const primaryMeta = createInlineMeta([
-    `latest ${data.version}`,
-    formatDownloads(data.weeklyDownloads),
-    data.license ? `license ${data.license}` : undefined,
-    detail?.unpackedSize ? `size ${formatBytes(detail.unpackedSize)}` : undefined,
-  ])
-  const secondaryMeta = createInlineMeta([
-    detail?.date ? `published ${formatDate(detail.date)}` : undefined,
-    detail?.created ? `created ${formatDate(detail.created)}` : undefined,
-    detail?.modified ? `modified ${formatDate(detail.modified)}` : undefined,
-  ])
-  const resultMeta = createInlineMeta([
-    `result ${state.selectedIndex + 1}/${Math.max(state.results.length, 1)}`,
-    state.total > 0 ? `${state.total} total matches` : undefined,
-  ])
-  const links = linkRows.map(
-    ([label, value]) => `${label.padEnd(4, ' ')} ${truncateText(value, 72)}`,
-  )
+  const links = linkRows
+    .map(([label, value]) => createField(label, truncateText(value, 72)))
+    .filter(isDefinedString)
   const keywords = compactList(data.keywords, 10)
   const maintainers = data.maintainers
     .map(maintainer => maintainer.username ?? maintainer.name)
@@ -460,55 +453,64 @@ function createInspectorLines(
             tone: 'warning',
           } satisfies InspectorLine)
         : undefined
-  const headerBlock: InspectorLine[] = [
-    { text: `${data.name}@${data.version}`, tone: 'title' },
-    { text: data.description },
-  ]
+  const summaryMeta = createInlineMeta([
+    `latest v${data.version}`,
+    formatDownloads(data.weeklyDownloads),
+    data.license,
+    detail?.unpackedSize ? formatBytes(detail.unpackedSize) : undefined,
+  ])
+  const headerBlock: InspectorLine[] = [{ text: data.name, tone: 'title' }, { text: '' }]
   if (detail?.deprecated) {
     headerBlock.push({ text: `deprecated: ${detail.deprecated}`, tone: 'warning' })
   }
+  if (summaryMeta) {
+    headerBlock.push({ text: summaryMeta, tone: 'muted' })
+  }
+  headerBlock.push({ text: data.description })
   if (detailStatusLine) {
     headerBlock.push(detailStatusLine)
   }
 
-  const qualityRows = [
-    `weekly downloads ${formatDownloads(data.weeklyDownloads)}`,
-    detail?.versionCount ? `versions ${detail.versionCount}` : undefined,
-    `maintainers ${maintainers.length}`,
+  const healthRows = [
+    createField('downloads', formatDownloads(data.weeklyDownloads)),
+    createField('versions', detail?.versionCount),
+    createField('maintainers', maintainers.length),
     detail?.entryPoints?.dependenciesCount !== undefined
-      ? `dependencies ${detail.entryPoints.dependenciesCount}`
+      ? createField('dependencies', detail.entryPoints.dependenciesCount)
       : undefined,
     detail?.entryPoints?.peerDependenciesCount !== undefined
-      ? `peer dependencies ${detail.entryPoints.peerDependenciesCount}`
+      ? createField('peer deps', detail.entryPoints.peerDependenciesCount)
       : undefined,
-    distTags ? `dist-tags ${distTags}` : undefined,
+    createField('published', detail?.date ? formatDate(detail.date) : undefined),
+    createField('created', detail?.created ? formatDate(detail.created) : undefined),
+    createField('modified', detail?.modified ? formatDate(detail.modified) : undefined),
+    createField('dist-tags', distTags),
   ].filter(isDefinedString)
 
   const runtimeRows = [
-    detail?.entryPoints?.type ? `type ${detail.entryPoints.type}` : undefined,
-    detail?.entryPoints?.main ? `main ${detail.entryPoints.main}` : undefined,
-    detail?.entryPoints?.module ? `module ${detail.entryPoints.module}` : undefined,
-    detail?.entryPoints?.types ? `types ${detail.entryPoints.types}` : undefined,
+    createField('type', detail?.entryPoints?.type),
+    createField('main', detail?.entryPoints?.main),
+    createField('module', detail?.entryPoints?.module),
+    createField('types', detail?.entryPoints?.types),
     detail?.entryPoints?.hasExports !== undefined
-      ? `exports ${detail.entryPoints.hasExports ? 'yes' : 'no'}`
+      ? createField('exports', detail.entryPoints.hasExports ? 'yes' : 'no')
       : undefined,
-    binNames.length > 0 ? `bin ${compactList(binNames, 5)}` : undefined,
-    engineInfo ? `engines ${engineInfo}` : undefined,
+    createField('bin', binNames.length > 0 ? compactList(binNames, 5) : undefined),
+    createField('engines', engineInfo),
   ].filter(isDefinedString)
 
   const blocks: InspectorLine[][] = [
     headerBlock,
-    createBracketSection('metadata', [primaryMeta, secondaryMeta, resultMeta]),
     createInstallBlock(data.name),
-    createBracketSection('quality', qualityRows),
+    createBracketSection('health', healthRows),
     createBracketSection('runtime', runtimeRows),
-    createBracketSection('keywords', keywords ? [keywords] : []),
     createBracketSection('links', links),
+    createBracketSection('keywords', keywords ? [keywords] : []),
     createBracketSection(
       'maintainers',
       [
-        author ? `author ${author}` : undefined,
-        maintainers.length > 0 ? `team ${compactList(maintainers, 8)}` : undefined,
+        createField('author', author),
+        createField('team', maintainers.length > 0 ? compactList(maintainers, 8) : undefined),
       ].filter(isDefinedString),
     ),
   ].filter(block => block.length > 0)
@@ -554,7 +556,13 @@ function createStyledInspectorText(lines: InspectorLine[], theme: Theme): Styled
     }
 
     if (line.tone === 'section') {
-      chunks.push(fg(theme.accent)(bold(text)))
+      const newline = index === lines.length - 1 ? '' : '\n'
+      chunks.push(fg(theme.accent)(bold('[')))
+      chunks.push(fg(theme.fg.primary)(bold(line.text)))
+      chunks.push(fg(theme.accent)(bold(']')))
+      if (newline) {
+        chunks.push(fg(theme.fg.muted)(newline))
+      }
       return
     }
 
@@ -634,11 +642,15 @@ function createShortcutBarText(state: AppState, theme: Theme, width = 0): Styled
   const chunks: TextChunk[] = []
   const actions = contextActions(state)
   const brand = './npmx'
+  const padding = ' '.repeat(STATUS_BAR_PADDING_X)
+  const availableWidth = Math.max(0, width - STATUS_BAR_PADDING_X * 2)
   const shortcutsLength = actions.reduce(
     (length, action, index) =>
       length + (index > 0 ? 3 : 0) + action.key.length + 1 + action.label.length,
     0,
   )
+
+  chunks.push(fg(theme.fg.muted)(padding))
 
   actions.forEach((action, index) => {
     if (index > 0) {
@@ -649,9 +661,10 @@ function createShortcutBarText(state: AppState, theme: Theme, width = 0): Styled
     chunks.push(fg(theme.fg.secondary)(` ${action.label}`))
   })
 
-  const spacerWidth = width - shortcutsLength - brand.length
+  const spacerWidth = availableWidth - shortcutsLength - brand.length
   chunks.push(fg(theme.fg.muted)(spacerWidth > 0 ? ' '.repeat(spacerWidth) : '   '))
   chunks.push(fg(theme.fg.primary)(bold(brand)))
+  chunks.push(fg(theme.fg.muted)(padding))
 
   return new StyledText(chunks)
 }
@@ -858,7 +871,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   const inspector = instantiate(
     renderer,
     Text({
-      content: createStyledInspectorText(createInspectorLines(undefined, state), theme),
+      content: createStyledInspectorText(createInspectorLines(undefined), theme),
       fg: theme.fg.secondary,
       bg: theme.bg.base,
       height: 'auto',
@@ -983,7 +996,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   function updateInspector(): void {
     const pkg = selectedPackage(state)
     const detail = pkg ? detailCache.get(pkg.name) : undefined
-    const content = createInspectorLines(pkg, state, detail, detailStatus, detailError)
+    const content = createInspectorLines(pkg, detail, detailStatus, detailError)
     const viewportHeight = Math.max(1, inspector.height || 1)
 
     state.inspectorScrollOffset = Math.min(
@@ -991,7 +1004,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
       getMaxInspectorScrollOffset(content, viewportHeight),
     )
 
-    inspectorPane.title = pkg ? ` ${truncateText(pkg.name, 64)} ` : ' Preview '
+    inspectorPane.title = ' Preview '
     inspector.content = createStyledInspectorText(
       createScrollableLines(content, state.inspectorScrollOffset, viewportHeight),
       theme,
@@ -1193,7 +1206,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     }
 
     const detail = detailCache.get(pkg.name)
-    const content = createInspectorLines(pkg, state, detail, detailStatus, detailError)
+    const content = createInspectorLines(pkg, detail, detailStatus, detailError)
     const viewportHeight = Math.max(1, inspector.height || 1)
     const maxOffset = getMaxInspectorScrollOffset(content, viewportHeight)
     const nextOffset =
