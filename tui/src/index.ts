@@ -103,8 +103,8 @@ function isCtrlKey(key: KeyEvent, name: string): boolean {
   )
 }
 
-function shouldQuit(key: KeyEvent, mode: AppMode): boolean {
-  return mode === 'normal' && isPlainKey(key, 'q')
+function shouldQuit(key: KeyEvent, state: AppState): boolean {
+  return state.focus !== 'search' && isPlainKey(key, 'q')
 }
 
 function isAbortError(error: unknown): boolean {
@@ -593,10 +593,12 @@ interface ShortcutAction {
 }
 
 function contextActions(state: AppState): ShortcutAction[] {
-  if (state.mode === 'insert') {
+  if (state.focus === 'search') {
     return [
-      { key: 'esc', label: 'Normal' },
-      { key: '^c', label: 'Quit' },
+      { key: 'type', label: 'Search' },
+      { key: 'enter', label: 'Results' },
+      { key: '↑/↓', label: 'Results' },
+      { key: 'esc', label: 'Cancel' },
     ]
   }
 
@@ -701,8 +703,8 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   let theme = themeManager.theme
 
   const state: AppState = {
-    mode: 'normal',
-    focus: 'collection',
+    mode: 'insert',
+    focus: 'search',
     layout: renderer.terminalWidth >= SPLIT_LAYOUT_MIN_WIDTH ? 'split' : 'single',
     view: 'collection',
     query: '',
@@ -713,7 +715,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     selectedIndex: 0,
     inspectorScrollOffset: 0,
     statusKind: 'info',
-    statusMessage: 'Normal mode',
+    statusMessage: 'Search focused',
   }
 
   let debounceTimer: ReturnType<typeof setTimeout> | undefined
@@ -752,7 +754,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
       focusedTextColor: theme.fg.primary,
       focusedBackgroundColor: theme.bg.base,
       cursorColor: theme.accent,
-      showCursor: false,
+      showCursor: true,
     }),
   ) as InputRenderable
 
@@ -1114,7 +1116,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     }, SPINNER_FRAME_MS)
   }
 
-  function enterInsertMode(): void {
+  function focusSearch(): void {
     state.mode = 'insert'
     state.focus = 'search'
     if (state.layout === 'single') {
@@ -1122,17 +1124,8 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     }
     input.showCursor = true
     input.focus()
-    setStatus('Insert mode')
+    setStatus('Search focused')
     applyLayout()
-  }
-
-  function enterNormalMode(): void {
-    state.mode = 'normal'
-    state.focus = 'collection'
-    input.showCursor = false
-    input.blur()
-    updateFocusStyles()
-    setStatus('Normal mode')
   }
 
   function focusCollection(): void {
@@ -1238,6 +1231,25 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     return false
   }
 
+  function focusResultsFromSearch(position: 'current' | 'first' | 'last' = 'current'): boolean {
+    if (state.results.length === 0) {
+      setStatus('No results to focus')
+      return true
+    }
+
+    if (position === 'first') {
+      state.selectedIndex = 0
+    } else if (position === 'last') {
+      state.selectedIndex = state.results.length - 1
+    }
+
+    state.inspectorScrollOffset = 0
+    focusCollection()
+    updateCollection()
+    void loadSelectedPackageDetails()
+    return true
+  }
+
   function pageResults(direction: 'previous' | 'next'): boolean {
     if (
       !state.query.trim() ||
@@ -1288,7 +1300,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
       state.inspectorScrollOffset = 0
       state.errorMessage = undefined
       updateCollection()
-      setStatus(state.mode === 'insert' ? 'Insert mode' : 'Normal mode')
+      setStatus(state.focus === 'search' ? 'Search focused' : 'Results focused')
       return
     }
 
@@ -1369,28 +1381,65 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
 
   input.on(InputRenderableEvents.INPUT, scheduleSearch)
 
-  function handleNormalKey(key: KeyEvent): boolean {
-    if (isPlainKey(key, '/') || isPlainKey(key, 'i')) {
-      enterInsertMode()
+  function handleAppKey(key: KeyEvent): boolean {
+    if (state.focus !== 'search' && isPlainKey(key, '/')) {
+      focusSearch()
       return true
     }
 
     if (isPlainKey(key, 'escape')) {
+      if (state.focus === 'search') {
+        return focusResultsFromSearch()
+      }
+
+      if (state.focus === 'collection') {
+        focusSearch()
+        return true
+      }
+
       return showCollection()
     }
 
-    if (isPlainKey(key, 'h') || isPlainKey(key, 'left')) {
-      focusCollection()
-      return true
+    if (state.focus === 'search') {
+      if (isPlainKey(key, 'return')) {
+        return focusResultsFromSearch('first')
+      }
+
+      if (isPlainKey(key, 'down')) {
+        return focusResultsFromSearch('first')
+      }
+
+      if (isPlainKey(key, 'up')) {
+        return focusResultsFromSearch('last')
+      }
+
+      if (isPlainKey(key, '[') || isCtrlKey(key, 'u')) {
+        return pageResults('previous')
+      }
+
+      if (isPlainKey(key, ']') || isCtrlKey(key, 'd')) {
+        return pageResults('next')
+      }
+
+      return false
     }
 
-    if (isPlainKey(key, 'l') || isPlainKey(key, 'right')) {
-      return focusInspector()
+    if (isPlainKey(key, 'h') || isPlainKey(key, 'left')) {
+      if (state.focus === 'inspector') {
+        focusCollection()
+      } else {
+        focusSearch()
+      }
+      return true
     }
 
     if (isPlainKey(key, 'return')) {
       openSelection()
       return true
+    }
+
+    if (isPlainKey(key, 'l') || isPlainKey(key, 'right')) {
+      return focusInspector()
     }
 
     if (isPlainKey(key, '[') || isCtrlKey(key, 'u')) {
@@ -1423,18 +1472,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   }
 
   const modeHandler = (key: KeyEvent): void => {
-    if (state.mode === 'insert') {
-      if (!isPlainKey(key, 'escape')) {
-        return
-      }
-
-      key.preventDefault()
-      key.stopPropagation()
-      enterNormalMode()
-      return
-    }
-
-    if (!handleNormalKey(key)) {
+    if (!handleAppKey(key)) {
       return
     }
 
@@ -1443,7 +1481,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   }
 
   const quitHandler = (key: KeyEvent): void => {
-    if (!shouldQuit(key, state.mode)) {
+    if (!shouldQuit(key, state)) {
       return
     }
 
@@ -1519,7 +1557,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   renderer.root.add(shell)
   applyLayout()
   updateCollection()
-  enterNormalMode()
+  focusSearch()
 }
 
 export { createThemeManager }
