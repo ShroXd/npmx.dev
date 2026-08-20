@@ -8,17 +8,20 @@ const VERSION = '0.0.1'
 
 const { values } = parseArgs({
   options: {
-    help: {
+    'help': {
       type: 'boolean',
       short: 'h',
     },
-    version: {
+    'version': {
       type: 'boolean',
       short: 'v',
     },
-    theme: {
+    'theme': {
       type: 'string',
       short: 't',
+    },
+    'api-base-url': {
+      type: 'string',
     },
   },
 })
@@ -32,7 +35,8 @@ Usage:
 Options:
   -h, --help     Show help
   -v, --version  Show version
-  -t, --theme    Theme preference: system, dark, light`)
+  -t, --theme    Theme preference: system, dark, light
+      --api-base-url  npmx backend base URL`)
   process.exit(0)
 }
 
@@ -50,7 +54,11 @@ Expected one of: system, dark, light`)
   process.exit(1)
 }
 
-runTui({ version: VERSION, themePreference }).catch(error => {
+runTui({
+  version: VERSION,
+  themePreference,
+  apiBaseUrl: values['api-base-url'],
+}).catch(error => {
   const message = error instanceof Error ? error.message : String(error)
   console.error(message)
   process.exit(1)
