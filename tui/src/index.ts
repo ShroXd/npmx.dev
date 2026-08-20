@@ -628,10 +628,17 @@ function contextActions(state: AppState): ShortcutAction[] {
   ]
 }
 
-function createShortcutBarText(state: AppState, theme: Theme): StyledText {
+function createShortcutBarText(state: AppState, theme: Theme, width = 0): StyledText {
   const chunks: TextChunk[] = []
+  const actions = contextActions(state)
+  const brand = './npmx'
+  const shortcutsLength = actions.reduce(
+    (length, action, index) =>
+      length + (index > 0 ? 3 : 0) + action.key.length + 1 + action.label.length,
+    0,
+  )
 
-  contextActions(state).forEach((action, index) => {
+  actions.forEach((action, index) => {
     if (index > 0) {
       chunks.push(fg(theme.fg.muted)('   '))
     }
@@ -640,8 +647,9 @@ function createShortcutBarText(state: AppState, theme: Theme): StyledText {
     chunks.push(fg(theme.fg.secondary)(` ${action.label}`))
   })
 
-  chunks.push(fg(theme.fg.muted)('   '))
-  chunks.push(fg(theme.fg.primary)(bold('./npmx')))
+  const spacerWidth = width - shortcutsLength - brand.length
+  chunks.push(fg(theme.fg.muted)(spacerWidth > 0 ? ' '.repeat(spacerWidth) : '   '))
+  chunks.push(fg(theme.fg.primary)(bold(brand)))
 
   return new StyledText(chunks)
 }
@@ -913,9 +921,9 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
   const statusBar = instantiate(
     renderer,
     Text({
-      content: createShortcutBarText(state, theme),
+      content: createShortcutBarText(state, theme, renderer.terminalWidth),
       fg: theme.fg.muted,
-      bg: theme.bg.elevated,
+      bg: theme.bg.base,
       height: 1,
       truncate: true,
     }),
@@ -935,15 +943,19 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     ),
   ) as BoxRenderable
 
+  function getStatusBarWidth(): number {
+    return Math.max(1, Number(statusBar.width) || renderer.terminalWidth)
+  }
+
   function setStatus(message: string, kind: StatusKind = 'info'): void {
     state.statusMessage = message
     state.statusKind = kind
-    statusBar.content = createShortcutBarText(state, theme)
+    statusBar.content = createShortcutBarText(state, theme, getStatusBarWidth())
     statusBar.fg = theme.status[kind]
   }
 
   function updateStatusBar(): void {
-    statusBar.content = createShortcutBarText(state, theme)
+    statusBar.content = createShortcutBarText(state, theme, getStatusBarWidth())
     statusBar.fg = theme.status[state.statusKind]
   }
 
@@ -1483,7 +1495,7 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     inspector.bg = theme.bg.base
     resultsFooter.bg = theme.bg.base
     resultsFooter.content = createResultsFooterText(state, theme)
-    statusBar.bg = theme.bg.elevated
+    statusBar.bg = theme.bg.base
     statusBar.fg = theme.status[state.statusKind]
     updateInspector()
   }
