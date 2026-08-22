@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import process from 'node:process'
 import { spawn } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { parseArgs } from 'node:util'
 import { isThemePreference } from './theme/types.ts'
 
-const VERSION = '0.0.1'
 const MIN_NODE_VERSION: [number, number, number] = [26, 4, 0]
 const FFI_FLAG = '--experimental-ffi'
 const RESET = '\x1B[0m'
@@ -12,6 +12,17 @@ const BOLD = '\x1B[1m'
 const RED = '\x1B[31m'
 const CYAN = '\x1B[36m'
 const DIM = '\x1B[2m'
+
+function readPackageVersion(): string {
+  const packageJsonUrl = new URL('../package.json', import.meta.url)
+  const packageJson = JSON.parse(readFileSync(packageJsonUrl, 'utf8')) as { version?: unknown }
+
+  if (typeof packageJson.version !== 'string' || !packageJson.version) {
+    throw new Error('Unable to read npmx-tui version from package.json')
+  }
+
+  return packageJson.version
+}
 
 function parseNodeVersion(version: string): [number, number, number] {
   const [major = 0, minor = 0, patch = 0] = version
@@ -111,7 +122,7 @@ Options:
 }
 
 if (values.version) {
-  console.log(VERSION)
+  console.log(readPackageVersion())
   process.exit(0)
 }
 
@@ -130,7 +141,7 @@ await ensureExperimentalFfi()
 const { runTui } = await import('./index.ts')
 
 runTui({
-  version: VERSION,
+  version: readPackageVersion(),
   themePreference,
   apiBaseUrl: values['api-base-url'],
 }).catch(error => {
