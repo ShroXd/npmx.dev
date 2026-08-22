@@ -11,20 +11,19 @@ OpenTUI's native renderer requires Node.js 26.4.0+ with experimental FFI enabled
 From the repository root:
 
 ```bash
-pnpm npmx-tui
-```
-
-Or from this package:
-
-```bash
-cd tui
 pnpm dev
 ```
 
-`pnpm dev` starts the TUI in watch mode. Use the left and right arrow keys to switch between the two demo buttons, press Enter to activate the current button, and press Ctrl+C to exit.
-
-For a single run without watch:
+Then, in another terminal:
 
 ```bash
-pnpm --filter npmx-tui dev:ffi
+pnpm npmx-tui
+```
+
+`pnpm dev` starts the local npmx.dev backend. `pnpm npmx-tui` starts the TUI, which connects to `http://127.0.0.1:3000` by default. Use Ctrl+C to exit.
+
+For TUI watch mode:
+
+```bash
+pnpm npmx-tui:watch
 ```
