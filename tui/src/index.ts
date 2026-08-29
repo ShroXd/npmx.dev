@@ -54,6 +54,12 @@ import type {
   StatusKind,
 } from './app/types.ts'
 import { isCtrlKey, isPlainKey, shouldQuit } from './app/keys.ts'
+import {
+  formatResultsRange,
+  hasNextResultsPage,
+  hasPreviousResultsPage,
+  selectedPackage,
+} from './app/selectors.ts'
 import { createThemeManager, type Theme } from './theme/index.ts'
 
 function getRuntimeHint(error: unknown): string {
@@ -71,10 +77,6 @@ Current Node.js: ${process.version}`
 
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
-}
-
-function selectedPackage(state: AppState): PackageSearchResult | undefined {
-  return state.results[state.selectedIndex]
 }
 
 function createBracketSection(title: string, lines: string[]): InspectorLine[] {
@@ -519,24 +521,6 @@ function createShortcutBarText(state: AppState, theme: Theme, width = 0): Styled
   chunks.push(fg(theme.fg.muted)(padding))
 
   return new StyledText(chunks)
-}
-
-function hasNextResultsPage(state: AppState): boolean {
-  return state.query.trim().length > 0 && state.pageOffset + state.results.length < state.total
-}
-
-function hasPreviousResultsPage(state: AppState): boolean {
-  return state.query.trim().length > 0 && state.pageOffset > 0
-}
-
-function formatResultsRange(state: AppState): string {
-  if (!state.query.trim() || state.total === 0 || state.results.length === 0) {
-    return '0 / 0'
-  }
-
-  const start = state.pageOffset + 1
-  const end = state.pageOffset + state.results.length
-  return `${start}-${end} / ${state.total}`
 }
 
 function createResultsFooterText(state: AppState, theme: Theme): StyledText {
