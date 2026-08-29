@@ -25,51 +25,36 @@ import {
   type PackageDetails,
   type PackageSearchResult,
 } from './search.ts'
-import { createThemeManager, type Theme, type ThemePreference } from './theme/index.ts'
-
-export interface RunTuiOptions {
-  version?: string
-  themePreference?: ThemePreference
-  apiBaseUrl?: string
-}
-
-const SEARCH_DEBOUNCE_MS = 500
-const SEARCH_RESULT_LIMIT = 25
-const LIST_SCROLLBAR_WIDTH = 2
-const STATUS_BAR_PADDING_X = 1
-const SPLIT_LAYOUT_MIN_WIDTH = 100
-const SPINNER_FRAME_MS = 90
-const BRAILLE_SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'] as const
-
-type AppMode = 'normal' | 'insert'
-type LayoutMode = 'single' | 'split'
-type WorkspaceView = 'collection' | 'inspector'
-type FocusTarget = 'search' | 'collection' | 'inspector'
-type SearchStatus = 'idle' | 'debouncing' | 'searching' | 'success' | 'empty' | 'error'
-type DetailStatus = 'idle' | 'loading' | 'success' | 'error'
-type StatusKind = 'info' | 'success' | 'warning' | 'danger'
-
-interface AppState {
-  mode: AppMode
-  focus: FocusTarget
-  layout: LayoutMode
-  view: WorkspaceView
-  query: string
-  searchStatus: SearchStatus
-  results: PackageSearchResult[]
-  total: number
-  pageOffset: number
-  selectedIndex: number
-  inspectorScrollOffset: number
-  statusKind: StatusKind
-  statusMessage: string
-  errorMessage?: string
-}
-
-interface InspectorLine {
-  text: string
-  tone?: 'title' | 'section' | 'muted' | 'command' | 'warning' | 'danger'
-}
+import {
+  compactList,
+  createField,
+  createInlineMeta,
+  formatBytes,
+  formatDate,
+  formatDownloads,
+  formatRecord,
+  isDefinedString,
+  truncateText,
+} from './app/format.ts'
+import {
+  BRAILLE_SPINNER_FRAMES,
+  LIST_SCROLLBAR_WIDTH,
+  SEARCH_DEBOUNCE_MS,
+  SEARCH_RESULT_LIMIT,
+  SPINNER_FRAME_MS,
+  SPLIT_LAYOUT_MIN_WIDTH,
+  STATUS_BAR_PADDING_X,
+} from './app/constants.ts'
+import type {
+  AppState,
+  DetailStatus,
+  InspectorLine,
+  RunTuiOptions,
+  ShortcutAction,
+  StatusKind,
+} from './app/types.ts'
+import { isCtrlKey, isPlainKey, shouldQuit } from './app/keys.ts'
+import { createThemeManager, type Theme } from './theme/index.ts'
 
 function getRuntimeHint(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
@@ -84,140 +69,12 @@ Run this TUI with a compatible runtime, for example:
 Current Node.js: ${process.version}`
 }
 
-function isPlainKey(key: KeyEvent, name: string): boolean {
-  return (
-    key.eventType === 'press' &&
-    key.name.toLowerCase() === name &&
-    !key.ctrl &&
-    !key.meta &&
-    !key.option
-  )
-}
-
-function isCtrlKey(key: KeyEvent, name: string): boolean {
-  return (
-    key.eventType === 'press' &&
-    key.name.toLowerCase() === name &&
-    key.ctrl &&
-    !key.meta &&
-    !key.option
-  )
-}
-
-function shouldQuit(key: KeyEvent, state: AppState): boolean {
-  return state.focus !== 'search' && isPlainKey(key, 'q')
-}
-
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
 }
 
-function formatDownloads(downloads: number | undefined): string {
-  if (downloads === undefined) {
-    return 'downloads n/a'
-  }
-
-  if (downloads >= 1_000_000) {
-    return `${(downloads / 1_000_000).toFixed(1)}m/w`
-  }
-
-  if (downloads >= 1_000) {
-    return `${Math.round(downloads / 1_000)}k/w`
-  }
-
-  return `${downloads}/w`
-}
-
-function formatBytes(bytes: number | undefined): string | undefined {
-  if (bytes === undefined) {
-    return undefined
-  }
-
-  if (bytes >= 1024 * 1024) {
-    return `${(bytes / 1024 / 1024).toFixed(1)} MiB`
-  }
-
-  if (bytes >= 1024) {
-    return `${Math.round(bytes / 1024)} KiB`
-  }
-
-  return `${bytes} B`
-}
-
-function formatDate(value: string | undefined): string | undefined {
-  if (!value) {
-    return undefined
-  }
-
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return undefined
-  }
-
-  return date.toISOString().slice(0, 10)
-}
-
-function truncateText(text: string, maxLength: number): string {
-  if (maxLength <= 0) {
-    return ''
-  }
-
-  if (text.length <= maxLength) {
-    return text
-  }
-
-  if (maxLength <= 3) {
-    return '.'.repeat(maxLength)
-  }
-
-  return `${text.slice(0, Math.max(0, maxLength - 3))}...`
-}
-
 function selectedPackage(state: AppState): PackageSearchResult | undefined {
   return state.results[state.selectedIndex]
-}
-
-function compactList(items: string[] | undefined, limit: number): string {
-  if (!items) {
-    return ''
-  }
-
-  const visible = items.slice(0, limit)
-  const remaining = items.length - visible.length
-
-  if (remaining <= 0) {
-    return visible.join(', ')
-  }
-
-  return `${visible.join(', ')} +${remaining} more`
-}
-
-function isDefinedString(value: string | undefined): value is string {
-  return value !== undefined
-}
-
-function createInlineMeta(items: Array<string | undefined>): string {
-  return items.filter(isDefinedString).join('   ')
-}
-
-function createField(label: string, value: string | number | undefined): string | undefined {
-  if (value === undefined || value === '') {
-    return undefined
-  }
-
-  return `${label.padEnd(13, ' ')} ${value}`
-}
-
-function formatRecord(
-  record: Record<string, string> | undefined,
-  limit: number,
-): string | undefined {
-  if (!record) {
-    return undefined
-  }
-
-  const entries = Object.entries(record).map(([key, value]) => `${key}:${value}`)
-  return entries.length > 0 ? compactList(entries, limit) : undefined
 }
 
 function createBracketSection(title: string, lines: string[]): InspectorLine[] {
@@ -593,11 +450,6 @@ function createStyledInspectorText(lines: InspectorLine[], theme: Theme): Styled
   })
 
   return new StyledText(chunks)
-}
-
-interface ShortcutAction {
-  key: string
-  label: string
 }
 
 function contextActions(state: AppState): ShortcutAction[] {
@@ -1574,4 +1426,5 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
 }
 
 export { createThemeManager }
+export type { RunTuiOptions } from './app/types.ts'
 export type { Theme, ThemeManager, ThemeMode, ThemeName, ThemePreference } from './theme/index.ts'
