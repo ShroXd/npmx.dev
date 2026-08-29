@@ -60,6 +60,7 @@ import {
   hasPreviousResultsPage,
   selectedPackage,
 } from './app/selectors.ts'
+import { applyThemeToView, type AppThemeView } from './ui/applyTheme.ts'
 import { createThemeManager, type Theme } from './theme/index.ts'
 
 function getRuntimeHint(error: unknown): string {
@@ -794,6 +795,23 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
     ),
   ) as BoxRenderable
 
+  const appThemeView: AppThemeView = {
+    shell,
+    searchPanel,
+    inputRow,
+    workspace,
+    leftPane,
+    collectionPane,
+    inspectorPane,
+    prompt,
+    input,
+    spinner,
+    collectionList,
+    inspector,
+    resultsFooter,
+    statusBar,
+  }
+
   function getStatusBarWidth(): number {
     return Math.max(1, Number(statusBar.width) || renderer.terminalWidth)
   }
@@ -1345,46 +1363,16 @@ export async function runTui(options: RunTuiOptions = {}): Promise<void> {
 
   function applyTheme(nextTheme: Theme): void {
     theme = nextTheme
-    renderer.setBackgroundColor(theme.bg.base)
 
-    shell.backgroundColor = theme.bg.base
-    searchPanel.backgroundColor = theme.bg.base
-    searchPanel.focusedBorderColor = theme.border.focused
-    inputRow.backgroundColor = theme.bg.base
-    workspace.backgroundColor = theme.bg.base
-    leftPane.backgroundColor = theme.bg.base
-    collectionPane.backgroundColor = theme.bg.base
-    collectionPane.focusedBorderColor = theme.border.focused
-    inspectorPane.backgroundColor = theme.bg.base
-    inspectorPane.focusedBorderColor = theme.border.focused
-
-    prompt.fg = theme.accent
-    prompt.bg = theme.bg.base
-    input.backgroundColor = theme.bg.base
-    input.textColor = theme.fg.primary
-    input.placeholderColor = theme.fg.muted
-    input.focusedTextColor = theme.fg.primary
-    input.focusedBackgroundColor = theme.bg.base
-    input.cursorColor = theme.accent
-    spinner.fg = theme.accent
-    spinner.bg = theme.bg.base
-
-    collectionList.fg = theme.fg.secondary
-    collectionList.bg = theme.bg.base
-    collectionList.content = createCollectionListText(
+    applyThemeToView({
+      renderer,
+      view: appThemeView,
       state,
       theme,
-      Math.max(1, Number(collectionList.width) || 80),
-      Math.max(1, Number(collectionList.height) || 12),
-    )
-
-    inspector.fg = theme.fg.secondary
-    inspector.bg = theme.bg.base
-    resultsFooter.bg = theme.bg.base
-    resultsFooter.content = createResultsFooterText(state, theme)
-    statusBar.bg = theme.bg.base
-    statusBar.fg = theme.status[state.statusKind]
-    updateInspector()
+      createCollectionListText,
+      createResultsFooterText,
+      updateInspector,
+    })
   }
 
   applyTheme(theme)
